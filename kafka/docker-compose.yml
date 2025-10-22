@@ -1,9 +1,13 @@
-version: '3.8'
+networks:
+  kafka-net:
+    name: kafka-network
 
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.8.0
     container_name: zookeeper
+    networks:
+      - kafka-net
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -13,6 +17,8 @@ services:
   kafka:
     image: confluentinc/cp-kafka:7.8.0
     container_name: kafka
+    networks:
+      - kafka-net
     depends_on:
       - zookeeper
     ports:
@@ -34,6 +40,8 @@ services:
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
+    networks:
+      - kafka-net
     depends_on:
       - kafka
     ports:
