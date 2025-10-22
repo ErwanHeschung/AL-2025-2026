@@ -1,0 +1,73 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <mat-icon class="header-icon">medical_services</mat-icon>
+      <h1>Web Interface</h1>
+      <p class="subtitle">Sign in to continue</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-group">
+        <label for="username">
+          <mat-icon>person</mat-icon>
+          Username
+        </label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          [(ngModel)]="username"
+          placeholder="Enter your username"
+          required
+          autocomplete="username"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">
+          <mat-icon>lock</mat-icon>
+          Password
+        </label>
+        <div class="password-input">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="Enter your password"
+            required
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="togglePasswordVisibility()">
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        <mat-icon>error</mat-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <button type="submit" class="login-btn">
+        <span>Sign In</span>
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </form>
+
+    <div class="demo-credentials">
+      <p class="demo-title">Demo Credentials:</p>
+      <div class="demo-users">
+        <div class="demo-user">
+          <strong>Doctor:</strong> doctor / doctor123
+        </div>
+        <div class="demo-user">
+          <strong>Patient:</strong> patient / patient123
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
