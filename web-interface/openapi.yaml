@@ -1,0 +1,206 @@
+openapi: 3.0.3
+info:
+  title: Web Interface API
+  description: API for managing daily health questionnaires
+  version: 1.0.0
+  contact:
+    name: Web Interface Support
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local development server
+  - url: https://api.web-interface.com
+    description: Production server
+
+tags:
+  - name: questionnaire
+    description: Daily health questionnaire operations
+
+paths:
+  /questionnaire:
+    get:
+      tags:
+        - questionnaire
+      summary: Get questionnaire response by date
+      description: Retrieves the questionnaire response for a specific date
+      operationId: getQuestionnaire
+      parameters:
+        - name: date
+          in: query
+          description: Date in ISO format (YYYY-MM-DD)
+          required: true
+          schema:
+            type: string
+            format: date
+            example: "2025-10-22"
+      responses:
+        '200':
+          description: Questionnaire found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionnaireResponse'
+        '404':
+          description: No questionnaire found for this date
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "No questionnaire found for date 2025-10-22"
+        '400':
+          description: Invalid date format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - questionnaire
+      summary: Create or update questionnaire response
+      description: Saves a new questionnaire response or updates an existing one for the given date
+      operationId: saveQuestionnaire
+      requestBody:
+        description: Questionnaire data to save
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionnaireRequest'
+      responses:
+        '200':
+          description: Questionnaire updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '201':
+          description: Questionnaire created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "Validation error"
+                errors:
+                  - field: "breathing"
+                    message: "Value must be between 1 and 9"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    QuestionnaireRequest:
+      type: object
+      required:
+        - date
+        - breathing
+        - swelling
+        - energy
+      properties:
+        date:
+          type: string
+          format: date
+          description: Date of the questionnaire in ISO format (YYYY-MM-DD)
+          example: "2025-10-22"
+        breathing:
+          type: integer
+          minimum: 1
+          maximum: 9
+          description: Breathing score (1 = not short of breath, 9 = very short of breath)
+          example: 3
+        swelling:
+          type: integer
+          minimum: 1
+          maximum: 9
+          description: Leg swelling score (1 = not swollen, 9 = very swollen)
+          example: 2
+        energy:
+          type: integer
+          minimum: 1
+          maximum: 9
+          description: Energy level (1 = very tired, 9 = full of energy)
+          example: 7
+
+    QuestionnaireResponse:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          description: Date of the questionnaire
+          example: "2025-10-22"
+        breathing:
+          type: integer
+          minimum: 1
+          maximum: 9
+          example: 3
+        swelling:
+          type: integer
+          minimum: 1
+          maximum: 9
+          example: 2
+        energy:
+          type: integer
+          minimum: 1
+          maximum: 9
+          example: 7
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the questionnaire was first created
+          example: "2025-10-22T08:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the questionnaire was last updated
+          example: "2025-10-22T09:15:00Z"
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Questionnaire saved successfully"
+        data:
+          $ref: '#/components/schemas/QuestionnaireResponse'
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "An error occurred"
+        error:
+          type: string
+          example: "Database connection error"
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                example: "breathing"
+              message:
+                type: string
+                example: "Value must be between 1 and 9"

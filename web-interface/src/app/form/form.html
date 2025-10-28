@@ -1,0 +1,106 @@
+<div class="container">
+  <header>
+    <h1><mat-icon class="header-icon">assignment</mat-icon> Daily Questionnaire</h1>
+    <p class="date">{{ displayDate }}</p>
+    <p class="edit-mode-indicator" *ngIf="isEditMode"><mat-icon class="edit-icon">edit</mat-icon> Editing existing responses</p>
+  </header>
+
+  <div class="loading-message" *ngIf="isLoading">
+    <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+    <p>Loading questionnaire...</p>
+  </div>
+
+  <form *ngIf="!isLoading" (ngSubmit)="onSubmit()">
+    <div class="question-block">
+      <div class="question-header">
+        <mat-icon class="icon">air</mat-icon>
+        <h2>Breathing</h2>
+      </div>
+      <p class="question-text">How would you rate your breathing today?</p>
+
+      <div class="scale-container">
+        <div class="scale-labels">
+          <span>Not short of breath</span>
+          <span>Very short of breath</span>
+        </div>
+        <div class="scale-buttons">
+          <button
+            *ngFor="let value of [1, 2, 3, 4, 5, 6, 7, 8, 9]"
+            type="button"
+            class="scale-btn"
+            [class.active]="isSelected('breathing', value)"
+            (click)="selectValue('breathing', value)">
+            {{ value }}
+          </button>
+        </div>
+        <div class="scale-description">{{ breathingDesc }}</div>
+      </div>
+    </div>
+
+    <div class="question-block">
+      <div class="question-header">
+        <mat-icon class="icon">accessibility</mat-icon>
+        <h2>Leg Swelling</h2>
+      </div>
+      <p class="question-text">Are your ankles or legs swollen today?</p>
+
+      <div class="scale-container">
+        <div class="scale-labels">
+          <span>Not swollen</span>
+          <span>Very swollen</span>
+        </div>
+        <div class="scale-buttons">
+          <button
+            *ngFor="let value of [1, 2, 3, 4, 5, 6, 7, 8, 9]"
+            type="button"
+            class="scale-btn"
+            [class.active]="isSelected('swelling', value)"
+            (click)="selectValue('swelling', value)">
+            {{ value }}
+          </button>
+        </div>
+        <div class="scale-description">{{ swellingDesc }}</div>
+      </div>
+    </div>
+
+    <div class="question-block">
+      <div class="question-header">
+        <mat-icon class="icon">bolt</mat-icon>
+        <h2>Energy</h2>
+      </div>
+      <p class="question-text">How do you feel in terms of energy today?</p>
+
+      <div class="scale-container">
+        <div class="scale-labels">
+          <span>Very tired</span>
+          <span>Full of energy</span>
+        </div>
+        <div class="scale-buttons">
+          <button
+            *ngFor="let value of [1, 2, 3, 4, 5, 6, 7, 8, 9]"
+            type="button"
+            class="scale-btn"
+            [class.active]="isSelected('energy', value)"
+            (click)="selectValue('energy', value)">
+            {{ value }}
+          </button>
+        </div>
+        <div class="scale-description">{{ energyDesc }}</div>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn" [disabled]="!isFormValid()">
+      <span>{{ isEditMode ? 'Update Questionnaire' : 'Submit Questionnaire' }}</span>
+    </button>
+  </form>
+
+  <div class="success-message" *ngIf="showSuccess">
+    <mat-icon class="success-icon">check_circle</mat-icon>
+    <p>Questionnaire submitted successfully!</p>
+  </div>
+
+  <div class="error-message" *ngIf="showError">
+    <mat-icon class="error-icon">cancel</mat-icon>
+    <p>An error occurred. Please try again.</p>
+  </div>
+</div>

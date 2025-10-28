@@ -1,0 +1,181 @@
+<div class="container">
+  <header>
+    <h1><mat-icon class="header-icon">dashboard</mat-icon> Medical Dashboard</h1>
+    <div class="date-selector">
+      <button (click)="previousDay()" class="nav-btn">←</button>
+      <input type="date" [(ngModel)]="selectedDate" (change)="onDateChange()" />
+      <button (click)="nextDay()" class="nav-btn">→</button>
+    </div>
+  </header>
+
+  <div class="questionnaire-card" *ngIf="questionnaireData">
+    <div class="questionnaire-header">
+      <h2><mat-icon class="section-icon">assignment</mat-icon> Daily Questionnaire Results</h2>
+    </div>
+    <div class="questionnaire-results">
+      <div class="result-item">
+        <mat-icon class="result-icon">air</mat-icon>
+        <div class="result-content">
+          <div class="result-label">Breathing</div>
+          <div class="result-bar-container">
+            <div class="result-bar"
+                 [style.width]="getProgressWidth(questionnaireData.breathing)"
+                 [style.background-color]="getProgressColor('breathing', questionnaireData.breathing)"></div>
+            <span class="result-value">{{ questionnaireData.breathing }}/9</span>
+          </div>
+          <div class="result-description">{{ getDescriptionForValue('breathing', questionnaireData.breathing) }}</div>
+        </div>
+      </div>
+      <div class="result-item">
+        <mat-icon class="result-icon">accessibility</mat-icon>
+        <div class="result-content">
+          <div class="result-label">Leg Swelling</div>
+          <div class="result-bar-container">
+            <div class="result-bar"
+                 [style.width]="getProgressWidth(questionnaireData.swelling)"
+                 [style.background-color]="getProgressColor('swelling', questionnaireData.swelling)"></div>
+            <span class="result-value">{{ questionnaireData.swelling }}/9</span>
+          </div>
+          <div class="result-description">{{ getDescriptionForValue('swelling', questionnaireData.swelling) }}</div>
+        </div>
+      </div>
+      <div class="result-item">
+        <mat-icon class="result-icon">bolt</mat-icon>
+        <div class="result-content">
+          <div class="result-label">Energy</div>
+          <div class="result-bar-container">
+            <div class="result-bar"
+                 [style.width]="getProgressWidth(questionnaireData.energy)"
+                 [style.background-color]="getProgressColor('energy', questionnaireData.energy)"></div>
+            <span class="result-value">{{ questionnaireData.energy }}/9</span>
+          </div>
+          <div class="result-description">{{ getDescriptionForValue('energy', questionnaireData.energy) }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-header">
+        <mat-icon class="metric-icon">favorite</mat-icon>
+        <h2>Heart Rate at Rest</h2>
+      </div>
+      <div class="metric-chart">
+        <div class="chart-bars">
+          <div *ngFor="let bar of getChartBars('heartRate')"
+               class="chart-bar"
+               [style.height]="bar.height"
+               [title]="bar.value + ' bpm'"></div>
+        </div>
+      </div>
+      <div class="metric-stats">
+        <div class="stat">
+          <span class="stat-label">Min</span>
+          <span class="stat-value">{{ heartRateStats.min }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Avg</span>
+          <span class="stat-value">{{ heartRateStats.avg }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Max</span>
+          <span class="stat-value">{{ heartRateStats.max }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <mat-icon class="metric-icon">air</mat-icon>
+        <h2>Oxygen Saturation (SpO2)</h2>
+      </div>
+      <div class="metric-chart">
+        <div class="chart-bars">
+          <div *ngFor="let bar of getChartBars('spo2')"
+               class="chart-bar"
+               [style.height]="bar.height"
+               [title]="bar.value + '%'"></div>
+        </div>
+      </div>
+      <div class="metric-stats">
+        <div class="stat">
+          <span class="stat-label">Min</span>
+          <span class="stat-value">{{ spo2Stats.min }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Avg</span>
+          <span class="stat-value">{{ spo2Stats.avg }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Max</span>
+          <span class="stat-value">{{ spo2Stats.max }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <mat-icon class="metric-icon">directions_run</mat-icon>
+        <h2>Physical Activity</h2>
+      </div>
+      <div class="metric-chart">
+        <div class="chart-bars">
+          <div *ngFor="let bar of getChartBars('activity')"
+               class="chart-bar"
+               [style.height]="bar.height"
+               [title]="bar.value.toString()"></div>
+        </div>
+      </div>
+      <div class="metric-stats">
+        <div class="stat">
+          <span class="stat-label">Min</span>
+          <span class="stat-value">{{ activityStats.min }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Avg</span>
+          <span class="stat-value">{{ activityStats.avg }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Max</span>
+          <span class="stat-value">{{ activityStats.max }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hourly-table">
+    <h3>Hourly Data</h3>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Hour</th>
+            <th>Heart Rate (bpm)</th>
+            <th>SpO2 (%)</th>
+            <th>Activity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of medicalData?.hourlyData">
+            <td class="hour-cell">{{ data.hour }}</td>
+            <td class="metric-cell">
+              <span class="indicator" [class]="getHeartRateStatus(data.heartRate).color"></span>
+              {{ data.heartRate }} bpm
+            </td>
+            <td class="metric-cell">
+              <span class="indicator" [class]="getSpo2Status(data.spo2).color"></span>
+              {{ data.spo2 }}%
+            </td>
+            <td class="activity-cell">
+              <span class="activity-badge" [class]="getActivityLevel(data.activity).badge">
+                {{ getActivityLevel(data.activity).label }}
+              </span>
+              ({{ data.activity }})
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
