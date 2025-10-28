@@ -1,0 +1,13 @@
+networks:
+  iot-net:
+    external: true
+    name: iot-network
+
+services:
+  bracelet:
+    build: .
+    container_name: bracelet
+    environment:
+      - IOT_GATEWAY_URL=iot-gateway:8000
+    networks:
+      - iot-net

@@ -1,0 +1,18 @@
+networks:
+  iot-net:
+    driver: bridge
+    name: iot-network
+
+  kafka-net:
+    external: true
+    name: kafka-network
+
+services:
+  iot-gateway:
+    build: .
+    container_name: iot-gateway
+    environment:
+      - KAFKA_URL=kafka:29092
+    networks:
+      - iot-net
+      - kafka-net
