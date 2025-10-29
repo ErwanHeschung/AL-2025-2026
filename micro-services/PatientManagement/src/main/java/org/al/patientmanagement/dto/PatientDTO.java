@@ -15,4 +15,5 @@ public class PatientDTO {
     private String firstName;
     private String lastName;
     private String braceletId;
+    private UUID doctorId;
 }

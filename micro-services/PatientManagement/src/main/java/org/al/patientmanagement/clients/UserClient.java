@@ -15,6 +15,8 @@ public interface UserClient {
     @GetMapping("/users/{id}")
     PatientDTO getUserById(@PathVariable("id") UUID userId);
 
-    @GetMapping("/users")
-    List<PatientDTO> getUsersByIds(@RequestParam("ids") List<UUID> ids);
+    @GetMapping("/users/by-doctor")
+    List<PatientDTO> getUsersByDoctorId(
+            @RequestParam("doctorId") UUID doctorId
+    );
 }
