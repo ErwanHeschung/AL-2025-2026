@@ -28,4 +28,16 @@ public class User {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private Role role;
+
+    @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
+
+    @Column(unique = true)
+    private String braceletId;
+
+    @Column(nullable = true)
+    private UUID doctorId;
 }

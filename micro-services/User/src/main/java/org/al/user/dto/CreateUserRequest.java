@@ -14,4 +14,7 @@ public class CreateUserRequest {
     private String email;
     private String password;
     private String roleName;
+    private String firstName;
+    private String lastName;
+    private String braceletId;
 }

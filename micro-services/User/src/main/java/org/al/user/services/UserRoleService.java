@@ -1,6 +1,7 @@
 package org.al.user.services;
 
 import org.al.user.exceptions.RoleNotFoundException;
+import org.al.user.exceptions.UserIdNotFoundException;
 import org.al.user.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.al.user.dto.RoleDTO;
@@ -11,6 +12,9 @@ import org.al.user.servicesinterface.IRoleService;
 import org.al.user.servicesinterface.IUserRoleService;
 import org.al.user.servicesinterface.IUserService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -46,14 +50,32 @@ public class UserRoleService implements IUserRoleService {
         return userToUserDTO(user);
     }
 
+    @Override
+    public UserDTO getUserById(UUID userId) {
+        User user = userService.getUserById(userId)
+                .orElseThrow(() -> new UserIdNotFoundException(userId));
+
+        return userToUserDTO(user);
+    }
+
+    @Override
+    public List<UserDTO> getUsersByDoctorId(UUID doctorId) {
+        List<User> users = userService.getUserByDoctorId(doctorId);
+
+        return users.stream()
+                .map(this::userToUserDTO)
+                .toList();
+    }
+
     private UserDTO userToUserDTO(User user) {
         return UserDTO.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .role(RoleDTO.builder()
-                        .id(user.getRole().getId())
-                        .name(user.getRole().getName())
-                        .build())
+                .roleName(user.getRole().getName())
+                .braceletId(user.getBraceletId())
+                .doctorId(user.getDoctorId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
                 .build();
     }
 }

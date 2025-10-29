@@ -8,7 +8,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -40,5 +42,17 @@ public class UserService implements IUserService {
     @Transactional
     public void updateUser(User user) {
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<User> getUserById(UUID userId) {
+        return userRepository.findById(userId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<User> getUserByDoctorId(UUID doctorId) {
+        return userRepository.findByDoctorId(doctorId);
     }
 }

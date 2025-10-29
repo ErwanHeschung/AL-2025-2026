@@ -6,6 +6,9 @@ import org.al.user.servicesinterface.IUserRoleService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
@@ -37,4 +40,13 @@ public class UserController {
         return ResponseEntity.ok(hasRole);
     }
 
+    @GetMapping("/{id}")
+    public UserDTO getUserById(@PathVariable("id") UUID userId) {
+        return userRoleService.getUserById(userId);
+    }
+
+    @GetMapping("/by-doctor")
+    public List<UserDTO> getUsersByDoctorId(@RequestParam("doctorId") UUID doctorId) {
+        return userRoleService.getUsersByDoctorId(doctorId);
+    }
 }

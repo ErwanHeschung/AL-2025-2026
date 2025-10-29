@@ -10,5 +10,5 @@ ALTER TABLE role
 INSERT INTO role (name, description)
 VALUES
     ('DOCTOR', 'Role for medical doctors'),
-    ('RELATIVE', 'Role for relatives of patients')
+    ('NURSE', 'Role for nurses assisting patients')
     ON CONFLICT (name) DO NOTHING;
