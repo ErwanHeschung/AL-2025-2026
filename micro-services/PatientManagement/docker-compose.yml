@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  patient-management-db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: patient_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - patient-management-db-data:/var/lib/postgresql/data
+    networks:
+      - microservices-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      retries: 5
+
+  patient-management-service:
+    build: .
+    ports:
+      - "8081:8081"
+    environment:
+      DATABASE_URL: jdbc:postgresql://patient-management-db:5432/patient_management
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      USER_SERVICE_URL: http://user-service:8080
+      PROCESS_DATA_SERVICE_URL: http://data-processing-service:8082
+    depends_on:
+      patient-management-db:
+        condition: service_healthy
+    networks:
+      - microservices-net
+
+networks:
+  microservices-net:
+    external: true
+
+volumes:
+  patient-management-db-data:
