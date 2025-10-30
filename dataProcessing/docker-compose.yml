@@ -23,6 +23,8 @@ services:
   app-consumer:
     container_name: al-app
     build: .
+    ports:
+      - "8084:8084"
     networks:
       - kafka-net
     environment:
