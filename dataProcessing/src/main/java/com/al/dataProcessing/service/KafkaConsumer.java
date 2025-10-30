@@ -24,7 +24,7 @@ public class KafkaConsumer {
         this.accelerometerProcessor = accelerometerProcessor;
     }
 
-    @KafkaListener(topics = "${kafka.topic:defaultTopic}")
+    @KafkaListener(topics = "heartRate")
     public void listenToHearthRate(ConsumerRecord<String, String> record) {
         logMessageInfo(record);
         Message message = MessageUtils.getFieldsFromMessage(record.value());
