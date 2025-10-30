@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface IUserService {
-    User createUser(String username, String password);
+    User createUser(User user);
     Optional<User> getUserByEmail(String email);
     void updateUser(User user);
     Optional<User> getUserById(UUID userId);

@@ -1,7 +1,9 @@
 package org.al.user.services;
 
+import org.al.user.dto.CreateUserRequest;
 import org.al.user.exceptions.InvalidCredentialsException;
 import org.al.user.exceptions.RoleNotFoundException;
+import org.al.user.exceptions.UserAlreadyExistsException;
 import org.al.user.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.al.user.entities.Role;
@@ -23,11 +25,21 @@ public class AuthService implements IAuthService {
     private final IJwtService jwtService;
 
     @Override
-    public void createUserWithRole(String email, String password, String roleName) {
-        User user = userService.createUser(email, password);
-        Role role = roleService.getRoleByName(roleName).
-                orElseThrow(() -> new RoleNotFoundException(roleName));
-        if (role == null) throw new RoleNotFoundException(roleName);
+    public void createUser(CreateUserRequest createUserRequest) {
+        if (userService.getUserByEmail(createUserRequest.getEmail()).isPresent()) {
+            throw new UserAlreadyExistsException();
+        }
+        User user = User.builder()
+                .email(createUserRequest.getEmail())
+                .password(createUserRequest.getPassword())
+                .firstName(createUserRequest.getFirstName())
+                .lastName(createUserRequest.getLastName())
+                .braceletId(createUserRequest.getBraceletId())
+                .build();
+        user = userService.createUser(user);
+        Role role = roleService.getRoleByName(createUserRequest.getRoleName()).
+                orElseThrow(() -> new RoleNotFoundException(createUserRequest.getRoleName()));
+        if (role == null) throw new RoleNotFoundException(createUserRequest.getRoleName());
         user.setRole(role);
         userService.updateUser(user);
     }

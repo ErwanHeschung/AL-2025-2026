@@ -22,12 +22,9 @@ public class UserService implements IUserService {
 
     @Override
     @Transactional
-    public User createUser(String email, String password) {
-        String hashedPassword = passwordEncoder.encode(password);
-        User user = User.builder()
-                .email(email)
-                .password(hashedPassword)
-                .build();
+    public User createUser(User user) {
+        String hashedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(hashedPassword);
         return userRepository.save(user);
     }
 

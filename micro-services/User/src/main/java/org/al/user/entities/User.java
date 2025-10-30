@@ -35,7 +35,7 @@ public class User {
     @Column(nullable = false)
     private String lastName;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = true)
     private String braceletId;
 
     @Column(nullable = true)

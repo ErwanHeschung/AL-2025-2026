@@ -17,11 +17,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> createUser(@RequestBody CreateUserRequest request) {
-        authService.createUserWithRole(
-                request.getEmail(),
-                request.getPassword(),
-                request.getRoleName()
-        );
+        authService.createUser(request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("User created successfully");

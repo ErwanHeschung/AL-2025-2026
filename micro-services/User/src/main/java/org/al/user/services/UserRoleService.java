@@ -71,7 +71,7 @@ public class UserRoleService implements IUserRoleService {
         return UserDTO.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .roleName(user.getRole().getName())
+                .roleName(user.getRole() != null ? user.getRole().getName() : null)
                 .braceletId(user.getBraceletId())
                 .doctorId(user.getDoctorId())
                 .firstName(user.getFirstName())

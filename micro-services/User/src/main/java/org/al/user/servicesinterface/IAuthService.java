@@ -1,6 +1,8 @@
 package org.al.user.servicesinterface;
 
+import org.al.user.dto.CreateUserRequest;
+
 public interface IAuthService {
-    void createUserWithRole(String username, String password, String roleName);
+    void createUser(CreateUserRequest createUserRequest);
     String login(String username, String password);
 }
