@@ -10,9 +10,6 @@ services:
       JWT_SECRET: rA41g0rqqOqgneiRlr+0hIzS5yz6rLsBtU+4sT8fJmg=
     networks:
       - microservices-net
-    depends_on:
-      - user-service
-      - patient-management-service
 
 networks:
   microservices-net:
