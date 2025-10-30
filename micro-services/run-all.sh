@@ -1,5 +1,3 @@
-#!/bin/bash
-
 NETWORK_NAME="microservices-net"
 PROJECT_NAME="microservices"
 
@@ -9,11 +7,12 @@ if ! docker network ls | grep -q "$NETWORK_NAME"; then
   docker network create "$NETWORK_NAME"
 fi
 
-# Start all services using the same project name
-echo "Starting all services as a single stack..."
-
-docker-compose -p "$PROJECT_NAME" \
+# Start services separately
+docker-compose -p microservices \
   -f User/docker-compose.yml \
-  -f PatientManagement/docker-compose.yml up -d
+  -f PatientManagement/docker-compose.yml \
+  -f Gateway/docker-compose.yml \
+  up -d --remove-orphans
 
-echo "All services are up in project '$PROJECT_NAME'!"
+
+echo "All services are up!"

@@ -2,10 +2,13 @@
 
 PROJECT_NAME="microservices"
 
-echo "Stopping all services in project '$PROJECT_NAME'..."
+echo "Stopping User service..."
+docker-compose -p "$PROJECT_NAME" -f User/docker-compose.yml down
 
-docker-compose -p "$PROJECT_NAME" \
-  -f User/docker-compose.yml \
-  -f PatientManagement/docker-compose.yml down
+echo "Stopping PatientManagement service..."
+docker-compose -p "$PROJECT_NAME" -f PatientManagement/docker-compose.yml down
+
+echo "Stopping Gateway service..."
+docker-compose -p "$PROJECT_NAME" -f Gateway/docker-compose.yml down
 
 echo "All services stopped!"
