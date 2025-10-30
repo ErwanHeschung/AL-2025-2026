@@ -1,0 +1,31 @@
+version: '3.8'
+
+networks:
+  kafka-net:
+    external: true
+    name: kafka-network
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: timescaledb_container
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=healthdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+  app-consumer:
+    container_name: al-app
+    build: .
+    networks:
+      - kafka-net
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_TOPIC: topic
+      KAFKA_GROUP: group
+volumes:
+  timescaledb_data:
