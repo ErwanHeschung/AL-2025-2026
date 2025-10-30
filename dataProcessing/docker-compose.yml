@@ -18,6 +18,8 @@ services:
       - "5432:5432"
     volumes:
       - timescaledb_data:/var/lib/postgresql/data
+    networks:
+      - kafka-net
   app-consumer:
     container_name: al-app
     build: .
@@ -27,5 +29,8 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       KAFKA_TOPIC: topic
       KAFKA_GROUP: group
+      SPRING_DATASOURCE_URL: jdbc:postgresql://timescaledb:5432/healthdata
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
 volumes:
   timescaledb_data:

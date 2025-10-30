@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "heart_metrics")
-public class HeartMetric extends BaseMetric {
+@Table(name = "blood_oxygen_metrics")
+public class BloodOxygenMetric extends BaseMetric {
 
     @Column(nullable = false)
-    private Double value;
+    private Integer value;
 }

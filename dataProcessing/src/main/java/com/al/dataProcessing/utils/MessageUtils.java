@@ -1,37 +1,38 @@
 package com.al.dataProcessing.utils;
 
+import com.al.dataProcessing.model.AccelerometerMessage;
 import com.al.dataProcessing.model.Message;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
-
-import java.time.OffsetDateTime;
 
 @Slf4j
 public class MessageUtils {
 
-    public static Message getFieldsFromMessage(String message) {
-        Message messageReceived = new Message();
-        String[] parts = message.replace("{", "")
-                .replace("}", "")
-                .replace("\"", "")
-                .split(",");
-        try {
-            for (String part : parts) {
-                String[] keyValue = part.split(":", 2);
-                String key = keyValue[0].trim();
-                String value = keyValue[1].trim();
+    private static final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule());
 
-                switch (key) {
-                    case "braceletId" -> messageReceived.setBraceletId(value);
-                    case "type" -> messageReceived.setType(value);
-                    case "timestamp" -> messageReceived.setTimestamp(OffsetDateTime.parse(value));
-                    case "value" -> messageReceived.setValue(Integer.parseInt(value));
-                }
-            }
+    public static Message getFieldsFromMessage(String message) {
+        try {
+            Message messageReceived = objectMapper.readValue(message, Message.class);
+            log.info("Message extracted successfully : {}", messageReceived);
+            return messageReceived;
+
         } catch (Exception e) {
-            log.error("Error parsing message: {}", message, e);
-        } finally {
-            log.info("messageReceived: {}", messageReceived);
+            log.error("Error when extracting the message : {}", message, e);
+            return new Message();
         }
-        return messageReceived;
+    }
+
+    public static AccelerometerMessage getAccelerometerFieldsFromMessage(String message) {
+        try {
+            AccelerometerMessage accelerometerMessage = objectMapper.readValue(message, AccelerometerMessage.class);
+            log.info("AccelerometerMessage extracted with success : {}", accelerometerMessage);
+            return accelerometerMessage;
+
+        } catch (Exception e) {
+            log.error("Error when extracting : {}", message, e);
+            return new AccelerometerMessage();
+        }
     }
 }

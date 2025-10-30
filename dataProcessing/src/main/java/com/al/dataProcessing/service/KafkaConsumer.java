@@ -1,5 +1,6 @@
 package com.al.dataProcessing.service;
 
+import com.al.dataProcessing.model.AccelerometerMessage;
 import com.al.dataProcessing.model.Message;
 import com.al.dataProcessing.utils.MessageUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -13,10 +14,14 @@ import org.springframework.stereotype.Service;
 public class KafkaConsumer {
 
     private final HeartRateProcessor heartRateProcessor;
+    private final BloodOxygenProcessor bloodOxygenProcessor;
+    private final AccelerometerProcessor accelerometerProcessor;
 
     @Autowired
-    public KafkaConsumer(HeartRateProcessor hearthRateProcessor) {
+    public KafkaConsumer(HeartRateProcessor hearthRateProcessor, BloodOxygenProcessor bloodOxygenProcessor, AccelerometerProcessor accelerometerProcessor) {
         this.heartRateProcessor = hearthRateProcessor;
+        this.bloodOxygenProcessor = bloodOxygenProcessor;
+        this.accelerometerProcessor = accelerometerProcessor;
     }
 
     @KafkaListener(topics = "${kafka.topic:defaultTopic}")
@@ -30,11 +35,15 @@ public class KafkaConsumer {
     @KafkaListener(topics = "bloodOxygen")
     public void listenToBloodOxygen(ConsumerRecord<String, String> record) {
         logMessageInfo(record);
+        Message message = MessageUtils.getFieldsFromMessage(record.value());
+        bloodOxygenProcessor.process(message);
     }
 
     @KafkaListener(topics = "accelerometer")
     public void listenToAccelerometer(ConsumerRecord<String, String> record) {
         logMessageInfo(record);
+        AccelerometerMessage message = MessageUtils.getAccelerometerFieldsFromMessage(record.value());
+        accelerometerProcessor.process(message);
     }
 
     private static void logMessageInfo(ConsumerRecord<String, String> record) {
