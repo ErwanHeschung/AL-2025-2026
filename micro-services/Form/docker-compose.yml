@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  form-db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: form
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - form-db-data:/var/lib/postgresql/data
+    networks:
+      - microservices-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      retries: 5
+
+  form-service:
+    build: .
+    ports:
+      - "8082:8082"
+    environment:
+      DATABASE_URL: jdbc:postgresql://form-db:5432/form
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      form-db:
+        condition: service_healthy
+    networks:
+      - microservices-net
+
+networks:
+  microservices-net:
+    external: true
+
+volumes:
+  form-db-data:
