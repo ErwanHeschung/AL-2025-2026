@@ -1,0 +1,16 @@
+services:
+  gateway:
+    build: .
+    ports:
+      - "8084:8084"
+    environment:
+      GATEWAY_PORT: 8084
+      USER_SERVICE_URL: http://user-service:8080
+      PATIENT_SERVICE_URL: http://patient-management-service:8081
+      JWT_SECRET: rA41g0rqqOqgneiRlr+0hIzS5yz6rLsBtU+4sT8fJmg=
+    networks:
+      - microservices-net
+
+networks:
+  microservices-net:
+    external: true
