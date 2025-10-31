@@ -13,4 +13,8 @@ docker-compose -p "$PROJECT_NAME" -f PatientManagement/docker-compose.yml build
 echo "Building Gateway service..."
 docker-compose -p "$PROJECT_NAME" -f Gateway/docker-compose.yml build
 
+echo "Building Form service..."
+docker-compose -p "$PROJECT_NAME" -f Form/docker-compose.yml build
+
+
 echo "All images built!"

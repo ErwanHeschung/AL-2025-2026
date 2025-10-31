@@ -10,11 +10,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GatewayConfig {
 
-    @Value("${user.service.url:http://localhost:8080}")
+    @Value("${user.service.url}")
     private String userServiceUrl;
 
-    @Value("${patient.service.url:http://localhost:8081}")
+    @Value("${patient.service.url}")
     private String patientServiceUrl;
+
+    @Value("${form.service.url}")
+    private String formServiceUrl;
 
     @Bean
     public RouteLocator routes(RouteLocatorBuilder builder) {
@@ -23,6 +26,8 @@ public class GatewayConfig {
                         .uri(userServiceUrl))
                 .route("patient-service", r -> r.path("/patients/**")
                         .uri(patientServiceUrl))
+                .route("form-service", r -> r.path("/forms/**")
+                        .uri(formServiceUrl))
                 .build();
     }
 }
