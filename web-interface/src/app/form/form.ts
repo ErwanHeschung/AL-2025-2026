@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { HealthDataService, QuestionnaireResponse } from '../services/health-data';
+import { HealthDataService } from '../services/health-data';
+import { FormService, FormData } from '../services/form.service';
 
 @Component({
   selector: 'app-form',
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule, FormsModule, MatIconModule],
   templateUrl: './form.html',
   styleUrl: './form.css'
 })
@@ -19,13 +21,14 @@ export class FormComponent implements OnInit {
   breathingDesc: string = '';
   swellingDesc: string = '';
   energyDesc: string = '';
-  isLoading: boolean = true;
+  isLoading: boolean = false;
   showSuccess: boolean = false;
   showError: boolean = false;
-  isEditMode: boolean = false;
+  errorMessage: string = '';
 
   constructor(
     private healthDataService: HealthDataService,
+    private formService: FormService,
     private router: Router
   ) {}
 
@@ -38,19 +41,6 @@ export class FormComponent implements OnInit {
       month: 'long',
       day: 'numeric'
     });
-
-    const existingResponse = this.healthDataService.getQuestionnaireResponse(this.currentDate);
-    if (existingResponse) {
-      this.breathing = existingResponse.breathing;
-      this.swelling = existingResponse.swelling;
-      this.energy = existingResponse.energy;
-      this.isEditMode = true;
-      this.updateDescriptions();
-    }
-
-    setTimeout(() => {
-      this.isLoading = false;
-    }, 500);
   }
 
   selectValue(question: string, value: number): void {
@@ -78,39 +68,44 @@ export class FormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (!this.isFormValid()) return;
+    console.log('onSubmit called');
+    console.log('Form valid:', this.isFormValid());
+    console.log('Values:', { breathing: this.breathing, swelling: this.swelling, energy: this.energy });
 
-    const response: QuestionnaireResponse = {
-      date: this.currentDate,
+    if (!this.isFormValid()) {
+      console.log('Form is not valid, returning');
+      return;
+    }
+
+    this.isLoading = true;
+
+    const formData: FormData = {
       breathing: this.breathing!,
       swelling: this.swelling!,
       energy: this.energy!
     };
 
-    try {
-      this.healthDataService.saveQuestionnaireResponse(response);
-      this.showSuccess = true;
-      setTimeout(() => {
-        this.showSuccess = false;
-        this.router.navigate(['/dashboard']);
-      }, 1500);
-    } catch (error) {
-      this.showError = true;
-      setTimeout(() => {
-        this.showError = false;
-      }, 3000);
-    }
+    console.log('Submitting form data:', formData, 'for date:', this.currentDate);
+
+    this.formService.submitQuestionnaire(formData, this.currentDate).subscribe({
+      next: (response) => {
+        console.log('Form submitted successfully:', response);
+        this.isLoading = false;
+        this.showSuccess = true;
+        setTimeout(() => {
+          this.showSuccess = false;
+        }, 2000);
+      },
+      error: (error) => {
+        console.error('Error submitting form:', error);
+        this.isLoading = false;
+        this.showError = true;
+        this.errorMessage = error.error?.message || 'Failed to submit questionnaire. Please try again.';
+        setTimeout(() => {
+          this.showError = false;
+        }, 3000);
+      }
+    });
   }
 
-  private updateDescriptions(): void {
-    if (this.breathing) {
-      this.breathingDesc = this.healthDataService.getDescriptionForValue('breathing', this.breathing);
-    }
-    if (this.swelling) {
-      this.swellingDesc = this.healthDataService.getDescriptionForValue('swelling', this.swelling);
-    }
-    if (this.energy) {
-      this.energyDesc = this.healthDataService.getDescriptionForValue('energy', this.energy);
-    }
-  }
 }

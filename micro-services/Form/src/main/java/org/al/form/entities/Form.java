@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Type;
 
-
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -26,6 +26,9 @@ public class Form {
 
     @Column(nullable = false)
     private UUID issuerId;
+
+    @Column(nullable = false)
+    private LocalDate date;
 
     @Type(JsonBinaryType.class)
     @Column(columnDefinition = "jsonb")

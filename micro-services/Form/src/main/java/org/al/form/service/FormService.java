@@ -20,7 +20,20 @@ public class FormService implements IFormService {
 
     @Override
     public FormResponse createForm(FormRequest request) {
-        Form form = toEntity(request);
+        // Check if a form already exists for this patient and date
+        Form form = repository.findByPatientIdAndDate(request.getPatientId(), request.getDate())
+                .orElse(null);
+
+        if (form != null) {
+            // Update existing form
+            form.setIssuerId(request.getIssuerId());
+            form.setData(request.getData());
+            form.setType(request.getType());
+        } else {
+            // Create new form
+            form = toEntity(request);
+        }
+
         Form saved = repository.save(form);
         return toResponse(saved);
     }
@@ -59,6 +72,7 @@ public class FormService implements IFormService {
         Form form = new Form();
         form.setPatientId(request.getPatientId());
         form.setIssuerId(request.getIssuerId());
+        form.setDate(request.getDate());
         form.setData(request.getData());
         form.setType(request.getType());
         return form;
@@ -69,6 +83,7 @@ public class FormService implements IFormService {
                 .id(form.getId())
                 .patientId(form.getPatientId())
                 .issuerId(form.getIssuerId())
+                .date(form.getDate())
                 .data(form.getData())
                 .type(form.getType())
                 .build();

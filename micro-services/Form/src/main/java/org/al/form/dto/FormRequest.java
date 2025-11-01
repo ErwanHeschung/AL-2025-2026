@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.NotBlank;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -21,6 +22,9 @@ public class FormRequest {
 
     @NotNull
     private UUID issuerId;
+
+    @NotNull
+    private LocalDate date;
 
     @NotBlank
     private String data;

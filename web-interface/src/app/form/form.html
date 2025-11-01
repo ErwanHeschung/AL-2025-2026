@@ -2,12 +2,11 @@
   <header>
     <h1><mat-icon class="header-icon">assignment</mat-icon> Daily Questionnaire</h1>
     <p class="date">{{ displayDate }}</p>
-    <p class="edit-mode-indicator" *ngIf="isEditMode"><mat-icon class="edit-icon">edit</mat-icon> Editing existing responses</p>
   </header>
 
   <div class="loading-message" *ngIf="isLoading">
     <mat-icon class="loading-icon">hourglass_empty</mat-icon>
-    <p>Loading questionnaire...</p>
+    <p>Submitting questionnaire...</p>
   </div>
 
   <form *ngIf="!isLoading" (ngSubmit)="onSubmit()">
@@ -89,8 +88,9 @@
       </div>
     </div>
 
-    <button type="submit" class="submit-btn" [disabled]="!isFormValid()">
-      <span>{{ isEditMode ? 'Update Questionnaire' : 'Submit Questionnaire' }}</span>
+    <button type="submit" class="submit-btn" [disabled]="!isFormValid() || isLoading">
+      <span *ngIf="!isLoading">Submit Questionnaire</span>
+      <span *ngIf="isLoading">Submitting...</span>
     </button>
   </form>
 
@@ -101,6 +101,6 @@
 
   <div class="error-message" *ngIf="showError">
     <mat-icon class="error-icon">cancel</mat-icon>
-    <p>An error occurred. Please try again.</p>
+    <p>{{ errorMessage }}</p>
   </div>
 </div>
