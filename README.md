@@ -4,8 +4,8 @@ Ce document regroupe des fichiers markdown prêts à déposer dans le repo GitHu
 
 * `README.md` — comment lancer / utiliser le projet (Quickstart + prerequis)
 * [CONTRIBUTING.md](CONTRIBUTION.md) — règles de contribution
-* `ARCHITECTURE.md` — description de l'architecture, justification technique et diagramme logique
-* `RISK_MATRIX.md` — matrice d'analyse de risques (probabilité / impact / mitigation)
+* [ARCHITECTURE.md](ARCHITECTURE.md) — description de l'architecture, justification technique et diagramme logique
+* [RISK_MATRIX.md](RISK_MATRIX.md) — matrice d'analyse de risques (probabilité / impact / mitigation)
 
 ## Context
 
