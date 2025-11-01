@@ -134,11 +134,15 @@ MS -->|Événements| K
   - ACK ou confirmation de réception pour garantir la fiabilité.  
     - **Justification :** Assure que les données critiques physiologiques ne sont pas perdues et permet un suivi précis.  
 
+---
+
 - **Sécurité :**
   - Appairage BLE sécurisé et chiffrement AES-CCM.  
     - **Justification :** Protection contre interception ou injection de données sensibles.  
   - Signature et checksum pour garantir l’intégrité des données.  
     - **Justification :** Vérifie que les données ne sont pas corrompues pendant la transmission.    
+
+---
 
 - **Fiabilité :**
   - Retry automatique pour messages non envoyés ou non accusés.  
@@ -146,14 +150,20 @@ MS -->|Événements| K
   - Possibilité de **batching conditionnel** pour optimiser le trafic réseau.  
     - **Justification :** Limite le nombre de messages envoyés pour les métriques lentes (BPM, SpO₂), économisant énergie et bande passante.  
 
+---
+
 - **Déploiement :**
   - Stockage tampon minimal pour messages non transmis, libéré dès réception confirmée par la Gateway.  
     - **Justification :** Garantit fiabilité tout en limitant l’utilisation mémoire sur le bracelet.  
 
+---
+
 - **Monitoring :**
   - Logs internes limités pour économie de mémoire, exportables via Gateway pour supervision.  
     - **Justification :** Permet de suivre la santé du dispositif et de diagnostiquer les problèmes sans saturer le bracelet.  
-  
+
+---
+
 **Schéma :**
 ```mermaid
 graph TD
@@ -166,8 +176,6 @@ B[Bracelet BLE] -->|Accélér., BPM, Oxygène| GW[IoT Gateway]
 
 **Mécanismes :**
 
-**Mécanismes :**
-
 - **Workflow :**
   - Reçoit les données des bracelets via **BLE**.  
   - Conversion et normalisation des mesures en **JSON**.  
@@ -177,11 +185,15 @@ B[Bracelet BLE] -->|Accélér., BPM, Oxygène| GW[IoT Gateway]
   - Envoi d’un **ACK** vers le bracelet après réception et validation des données.  
   - **Justification :** la séparation entre `captor_name` et `alert` permet un routage prioritaire des urgences sans surcharger le flux principal de télémétrie.
 
+---
+
 - **Sécurité :**
   - Connexion BLE sécurisée avec chiffrement **AES-CCM**.  
   - Connexion à Kafka via **SASL_SSL** pour authentification et chiffrement des échanges.  
   - Validation du schéma JSON et contrôle d’intégrité avant envoi.  
   - **Justification :** ces mécanismes garantissent que seules des données fiables et authentifiées sont propagées vers le Cloud.
+
+---
 
 - **Fiabilité :**
   - Buffer local (en RAM ou fichier) pour stocker temporairement les mesures en cas de perte de connectivité Kafka.  
@@ -189,11 +201,15 @@ B[Bracelet BLE] -->|Accélér., BPM, Oxygène| GW[IoT Gateway]
   - Reconnexion BLE automatique.  
   - **Justification :** permet une continuité du flux de données même en cas d’incident réseau ou matériel.
 
+---
+
 - **Déploiement :**
   - Conteneur Docker léger (ARM/x86 compatible).  
   - Configuration via variables d’environnement (Kafka brokers, topics, seuils d’alerte, fréquence de polling).  
   - Healthchecks actifs pour supervision par orchestrateur (Docker Compose).  
   - **Justification :** assure un déploiement homogène sur différentes passerelles physiques tout en simplifiant la maintenance.
+
+---
 
 - **Monitoring :**
   - Export métriques vers Prometheus : taux de messages traités, taux d’erreurs, latence BLE, backlog Kafka.  
@@ -201,10 +217,77 @@ B[Bracelet BLE] -->|Accélér., BPM, Oxygène| GW[IoT Gateway]
   - Alertes techniques si déconnexion prolongée ou fréquence de publication anormale.  
   - **Justification :** visibilité complète du pipeline IoT et détection proactive des pannes.
 
+---
+
 **Schéma :**
 ```mermaid
 graph TD
 B[Bracelet BLE] -->|Accélér., BPM, Oxygène| GW[IoT Gateway]
 GW -->|Topic: captor_name - mesures brutes| K[Kafka]
 GW -->|Topic: alert - données critiques| K
+```
+
+### 3.3 Kafka
+
+**Rôle :** middleware assurant la transmission fiable, asynchrone et distribuée des données entre la couche IoT (Gateway) et les micro-services du Cloud.  
+
+---
+
+**Mécanismes :**
+
+- **Workflow :**
+  - Reçoit les publications de la Gateway sur deux topics principaux :  
+    - `captor_name` → données brutes (Accéléromètre, BPM, Oxygène).  
+    - `alert` → messages prioritaires (alerte médicale, anomalie critique).  
+  - Les micro-services consommateurs (`data-processor`, `alert-service`) s’abonnent aux topics correspondants.  
+  - Les messages sont traités de manière asynchrone pour éviter tout blocage de flux.  
+  - **Justification :** découple complètement la collecte IoT du traitement applicatif, garantissant la tolérance aux pannes et une ingestion fluide à grande échelle.
+
+---
+
+- **Sécurité :**
+  - Communication sécurisée via **SASL_SSL** (authentification + chiffrement TLS).  
+  - Contrôle d’accès par **ACL** sur les topics : seules les passerelles autorisées peuvent publier, et seuls les micro-services validés peuvent consommer.  
+  - **Justification :** prévient les accès non autorisés, la falsification des messages et les erreurs de structure.
+
+---
+
+- **Fiabilité :**
+  - Réplication des partitions.  
+  - Acknowledgements (`acks=all`) pour garantir la persistance des messages.  
+  - Stockage persistant.  
+  - **Justification :** aucun message n’est perdu même en cas de panne d’un broker ou d’une instance Gateway.
+
+---
+
+- **Déploiement :**
+  - Cluster Kafka orchestré (Docker Compose).  
+  - Brokers distribués + Zookeeper.  
+  - Configuration de la rétention (ex : 7 jours) et du débit maximal par topic.  
+  - **Justification :** permet une montée en charge linéaire et un déploiement multi-environnements (préprod, prod, test).
+
+---
+
+- **Monitoring :**
+  - Intégration Prometheus :  
+    - latence moyenne de production et consommation,  
+    - taille des partitions,  
+    - taux d’erreurs réseau,  
+    - backlog de messages non consommés.  
+  - Alertes automatisées sur consommation lente ou saturation de partition.  
+  - **Justification :** garantit la stabilité du pipeline temps réel et la réactivité face aux anomalies.
+
+---
+
+- **Scalabilité :**
+  - Partitionnement selon la charge pour paralléliser le traitement des données.  
+  - **Justification :** Kafka supporte une croissance continue sans goulot d’étranglement.
+
+---
+
+**Schéma :**
+```mermaid
+GW[IoT Gateway] -->|Topic: captor_name - mesures brutes| K[Kafka Cluster]
+GW -->|Topic: alert - données critiques| K
+K -->|Consommation asynchrone| MS[Microservices]
 ```
