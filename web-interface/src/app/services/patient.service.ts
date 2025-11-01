@@ -32,7 +32,6 @@ export class PatientService {
     const userId = payload.id;
 
     const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
       'X-User-Id': userId
     });
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth';
 
@@ -58,11 +58,7 @@ export class FormService {
       type: 'daily_questionnaire'
     };
 
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
-    return this.http.post<FormResponse>(this.API_URL, request, { headers });
+    return this.http.post<FormResponse>(this.API_URL, request);
   }
 
   getPatientForms(limit: number = 10): Observable<FormResponse[]> {
@@ -74,13 +70,8 @@ export class FormService {
     const payload = this.decodeToken(token);
     const userId = payload.id;
 
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
     return this.http.get<FormResponse[]>(
-      `${this.API_URL}/patient/${userId}?limit=${limit}`,
-      { headers }
+      `${this.API_URL}/patient/${userId}?limit=${limit}`
     );
   }
 
@@ -93,29 +84,14 @@ export class FormService {
     const payload = this.decodeToken(token);
     const userId = payload.id;
 
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
     return this.http.get<FormResponse>(
-      `${this.API_URL}/patient-date/${userId}/${date}`,
-      { headers }
+      `${this.API_URL}/patient-date/${userId}/${date}`
     );
   }
 
   getPatientFormByDate(patientId: string, date: string): Observable<FormResponse | null> {
-    const token = this.authService.getToken();
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
     return this.http.get<FormResponse>(
-      `${this.API_URL}/patient-date/${patientId}/${date}`,
-      { headers }
+      `${this.API_URL}/patient-date/${patientId}/${date}`
     );
   }
 
