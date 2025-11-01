@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -29,7 +29,8 @@ export class FormComponent implements OnInit {
   constructor(
     private healthDataService: HealthDataService,
     private formService: FormService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -40,6 +41,57 @@ export class FormComponent implements OnInit {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
+    });
+
+    // Load existing form data for today if any
+    this.loadExistingFormData();
+  }
+
+  loadExistingFormData(): void {
+    this.isLoading = true;
+
+    this.formService.getFormByDate(this.currentDate).subscribe({
+      next: (formResponse) => {
+        // Handle if response is an array (backend returns array sometimes)
+        const form = Array.isArray(formResponse) && formResponse.length > 0 ? formResponse[0] : formResponse;
+
+        if (form && form.data) {
+          try {
+            const formData = JSON.parse(form.data);
+
+            // Set values with a slight delay to ensure DOM is ready
+            setTimeout(() => {
+              // Ensure values are numbers
+              this.breathing = Number(formData.breathing);
+              this.swelling = Number(formData.swelling);
+              this.energy = Number(formData.energy);
+
+              // Update descriptions
+              if (this.breathing !== null && !isNaN(this.breathing)) {
+                this.breathingDesc = this.healthDataService.getDescriptionForValue('breathing', this.breathing);
+              }
+              if (this.swelling !== null && !isNaN(this.swelling)) {
+                this.swellingDesc = this.healthDataService.getDescriptionForValue('swelling', this.swelling);
+              }
+              if (this.energy !== null && !isNaN(this.energy)) {
+                this.energyDesc = this.healthDataService.getDescriptionForValue('energy', this.energy);
+              }
+
+              this.isLoading = false;
+              this.cdr.detectChanges();
+            }, 100);
+          } catch (error) {
+            console.error('Error parsing form data:', error);
+            this.isLoading = false;
+          }
+        } else {
+          this.isLoading = false;
+        }
+      },
+      error: (error) => {
+        console.error('Error loading existing form:', error);
+        this.isLoading = false;
+      }
     });
   }
 
@@ -68,14 +120,7 @@ export class FormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    console.log('onSubmit called');
-    console.log('Form valid:', this.isFormValid());
-    console.log('Values:', { breathing: this.breathing, swelling: this.swelling, energy: this.energy });
-
-    if (!this.isFormValid()) {
-      console.log('Form is not valid, returning');
-      return;
-    }
+    if (!this.isFormValid()) return;
 
     this.isLoading = true;
 
@@ -85,11 +130,8 @@ export class FormComponent implements OnInit {
       energy: this.energy!
     };
 
-    console.log('Submitting form data:', formData, 'for date:', this.currentDate);
-
     this.formService.submitQuestionnaire(formData, this.currentDate).subscribe({
       next: (response) => {
-        console.log('Form submitted successfully:', response);
         this.isLoading = false;
         this.showSuccess = true;
         setTimeout(() => {

@@ -53,6 +53,12 @@ public class FormService implements IFormService {
     }
 
     @Override
+    public Optional<FormResponse> getFormByPatientAndDate(UUID patientId, LocalDate date) {
+        return repository.findByPatientIdAndDate(patientId, date)
+                .map(this::toResponse);
+    }
+
+    @Override
     public List<FormResponse> getFormsByIssuer(UUID issuerId, int limit) {
         return repository.findTopByIssuerId(issuerId, limit).stream()
                 .map(this::toResponse)

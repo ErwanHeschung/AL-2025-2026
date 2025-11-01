@@ -5,8 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.al.form.dto.FormRequest;
 import org.al.form.dto.FormResponse;
 import org.al.form.serviceinterface.IFormService;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,11 +31,20 @@ public class FormController {
     }
 
     @GetMapping("/patient/{patientId}")
-    public List<FormResponse> getFormsByPatient(
+    public ResponseEntity<?> getFormsByPatient(
             @PathVariable UUID patientId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(defaultValue = "10") int limit
     ) {
-        return service.getFormsByPatient(patientId, limit);
+        // If date is provided, return the specific form for that date
+        if (date != null) {
+            return service.getFormByPatientAndDate(patientId, date)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        }
+
+        // Otherwise return the list of forms
+        return ResponseEntity.ok(service.getFormsByPatient(patientId, limit));
     }
 
     @GetMapping("/issuer/{issuerId}")
