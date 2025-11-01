@@ -1,10 +1,21 @@
 <div class="container">
   <header>
     <h1><mat-icon class="header-icon">dashboard</mat-icon> Medical Dashboard</h1>
-    <div class="date-selector">
-      <button (click)="previousDay()" class="nav-btn">←</button>
-      <input type="date" [(ngModel)]="selectedDate" (change)="onDateChange()" />
-      <button (click)="nextDay()" class="nav-btn">→</button>
+    <div class="controls">
+      <div class="patient-selector">
+        <label for="patient-select">Patient:</label>
+        <select id="patient-select" [(ngModel)]="selectedPatientId" (change)="onPatientChange()">
+          <option value="">Select a patient</option>
+          <option *ngFor="let patient of patients" [value]="patient.id">
+            {{ patient.firstName }} {{ patient.lastName }}
+          </option>
+        </select>
+      </div>
+      <div class="date-selector">
+        <button (click)="previousDay()" class="nav-btn" [disabled]="!selectedPatientId">←</button>
+        <input type="date" [(ngModel)]="selectedDate" (change)="onDateChange()" [disabled]="!selectedPatientId" />
+        <button (click)="nextDay()" class="nav-btn" [disabled]="!selectedPatientId">→</button>
+      </div>
     </div>
   </header>
 

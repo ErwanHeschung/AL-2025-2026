@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { HealthDataService, QuestionnaireResponse, DailyMedicalData, HourlyData } from '../services/health-data';
+import { PatientService, Patient } from '../services/patient.service';
 
 interface MetricStats {
   min: number;
@@ -17,6 +18,8 @@ interface MetricStats {
   styleUrl: './dashboard.css'
 })
 export class DashboardComponent implements OnInit {
+  patients: Patient[] = [];
+  selectedPatientId: string = '';
   selectedDate: string = '';
   questionnaireData: QuestionnaireResponse | null = null;
   medicalData: DailyMedicalData | null = null;
@@ -24,21 +27,57 @@ export class DashboardComponent implements OnInit {
   spo2Stats: MetricStats = { min: 0, avg: 0, max: 0 };
   activityStats: MetricStats = { min: 0, avg: 0, max: 0 };
 
-  constructor(private healthDataService: HealthDataService) {}
+  constructor(
+    private healthDataService: HealthDataService,
+    private patientService: PatientService
+  ) {}
 
   ngOnInit(): void {
     const today = new Date();
     this.selectedDate = today.toISOString().split('T')[0];
-    this.loadData();
+    this.loadPatients();
+  }
+
+  loadPatients(): void {
+    this.patientService.getPatients().subscribe({
+      next: (patients) => {
+        this.patients = patients;
+      },
+      error: (error) => {
+        console.error('Error loading patients:', error);
+      }
+    });
+  }
+
+  onPatientChange(): void {
+    if (this.selectedPatientId) {
+      this.loadData();
+    } else {
+      this.clearData();
+    }
   }
 
   loadData(): void {
+    if (!this.selectedPatientId) {
+      this.clearData();
+      return;
+    }
+
+    // TODO: Load data for the selected patient
     this.questionnaireData = this.healthDataService.getQuestionnaireResponse(this.selectedDate);
     this.medicalData = this.healthDataService.getMedicalData(this.selectedDate);
 
     if (this.medicalData) {
       this.calculateStats();
     }
+  }
+
+  clearData(): void {
+    this.questionnaireData = null;
+    this.medicalData = null;
+    this.heartRateStats = { min: 0, avg: 0, max: 0 };
+    this.spo2Stats = { min: 0, avg: 0, max: 0 };
+    this.activityStats = { min: 0, avg: 0, max: 0 };
   }
 
   onDateChange(): void {
