@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 export interface LoginResponse {
   success: boolean;
@@ -8,10 +11,12 @@ export interface LoginResponse {
   message?: string;
 }
 
-export interface User {
-  username: string;
-  password: string;
-  role: 'doctor' | 'patient';
+interface JwtPayload {
+  sub: string;
+  id: string;
+  role: string;
+  iat: number;
+  exp: number;
 }
 
 @Injectable({
@@ -20,35 +25,41 @@ export interface User {
 export class AuthService {
   private readonly STORAGE_KEY = 'auth_token';
   private readonly ROLE_KEY = 'user_role';
+  private readonly API_URL = 'http://localhost:8084/auth';
 
-  private readonly MOCK_USERS: User[] = [
-    { username: 'doctor', password: 'doctor123', role: 'doctor' },
-    { username: 'patient', password: 'patient123', role: 'patient' }
-  ];
+  constructor(
+    private router: Router,
+    private http: HttpClient
+  ) {}
 
-  constructor(private router: Router) {}
+  login(email: string, password: string): Observable<LoginResponse> {
+    return this.http.post(
+      `${this.API_URL}/login`,
+      { email, password },
+      { responseType: 'text' }
+    ).pipe(
+      map((token: string) => {
+        // Decode JWT to get role
+        const payload = this.decodeToken(token);
+        const role = this.mapRole(payload.role);
 
-  login(username: string, password: string): LoginResponse {
-    const user = this.MOCK_USERS.find(
-      u => u.username === username && u.password === password
+        // Store token and role
+        localStorage.setItem(this.STORAGE_KEY, token);
+        localStorage.setItem(this.ROLE_KEY, role);
+
+        return {
+          success: true,
+          token,
+          role
+        };
+      }),
+      catchError((error: HttpErrorResponse) => {
+        return throwError(() => ({
+          success: false,
+          message: error.error || 'Invalid email or password'
+        }));
+      })
     );
-
-    if (user) {
-      const token = this.generateToken(username);
-      localStorage.setItem(this.STORAGE_KEY, token);
-      localStorage.setItem(this.ROLE_KEY, user.role);
-
-      return {
-        success: true,
-        token,
-        role: user.role
-      };
-    }
-
-    return {
-      success: false,
-      message: 'Invalid username or password'
-    };
   }
 
   logout(): void {
@@ -70,7 +81,21 @@ export class AuthService {
     return localStorage.getItem(this.STORAGE_KEY);
   }
 
-  private generateToken(username: string): string {
-    return btoa(`${username}:${Date.now()}`);
+  private decodeToken(token: string): JwtPayload {
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      throw new Error('Invalid JWT token');
+    }
+    const payload = parts[1];
+    const decoded = atob(payload);
+    return JSON.parse(decoded);
+  }
+
+  private mapRole(backendRole: string): 'doctor' | 'patient' {
+    // Map backend roles (DOCTOR, NURSE, etc.) to frontend roles
+    if (backendRole === 'DOCTOR' || backendRole === 'NURSE') {
+      return 'doctor';
+    }
+    return 'patient';
   }
 }

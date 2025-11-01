@@ -24,21 +24,24 @@ export class LoginComponent {
 
   onSubmit(): void {
     if (!this.username || !this.password) {
-      this.errorMessage = 'Please enter username and password';
+      this.errorMessage = 'Please enter email and password';
       return;
     }
 
-    const result = this.authService.login(this.username, this.password);
-
-    if (result.success && result.role) {
-      if (result.role === 'doctor') {
-        this.router.navigate(['/dashboard']);
-      } else {
-        this.router.navigate(['/form']);
+    this.authService.login(this.username, this.password).subscribe({
+      next: (result) => {
+        if (result.success && result.role) {
+          if (result.role === 'doctor') {
+            this.router.navigate(['/dashboard']);
+          } else {
+            this.router.navigate(['/form']);
+          }
+        }
+      },
+      error: (error) => {
+        this.errorMessage = error.message || 'Login failed';
       }
-    } else {
-      this.errorMessage = result.message || 'Login failed';
-    }
+    });
   }
 
   togglePasswordVisibility(): void {
