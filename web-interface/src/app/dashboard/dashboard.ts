@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { HealthDataService, QuestionnaireResponse, DailyMedicalData, HourlyData } from '../services/health-data';
 import { PatientService, Patient } from '../services/patient.service';
+import { FormService } from '../services/form.service';
 
 interface MetricStats {
   min: number;
@@ -29,7 +30,8 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private healthDataService: HealthDataService,
-    private patientService: PatientService
+    private patientService: PatientService,
+    private formService: FormService
   ) {}
 
   ngOnInit(): void {
@@ -63,13 +65,41 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    // TODO: Load data for the selected patient
-    this.questionnaireData = this.healthDataService.getQuestionnaireResponse(this.selectedDate);
-    this.medicalData = this.healthDataService.getMedicalData(this.selectedDate);
+    // Load form data for the selected patient and date
+    this.formService.getPatientFormByDate(this.selectedPatientId, this.selectedDate).subscribe({
+      next: (formResponse) => {
+        if (formResponse && formResponse.data) {
+          try {
+            const formData = JSON.parse(formResponse.data);
 
-    if (this.medicalData) {
-      this.calculateStats();
-    }
+            // Map form data to questionnaire response
+            this.questionnaireData = {
+              date: this.selectedDate,
+              breathing: formData.breathing,
+              swelling: formData.swelling,
+              energy: formData.energy
+            };
+          } catch (error) {
+            console.error('Error parsing form data:', error);
+            this.questionnaireData = null;
+          }
+        } else {
+          this.questionnaireData = null;
+        }
+
+        // Load medical data (still from mock service for now)
+        this.medicalData = this.healthDataService.getMedicalData(this.selectedDate);
+
+        if (this.medicalData) {
+          this.calculateStats();
+        }
+      },
+      error: (error) => {
+        console.error('Error loading form data:', error);
+        this.questionnaireData = null;
+        this.medicalData = null;
+      }
+    });
   }
 
   clearData(): void {

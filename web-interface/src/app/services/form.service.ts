@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { AuthService } from './auth';
 
 export interface FormData {
@@ -99,15 +98,24 @@ export class FormService {
     });
 
     return this.http.get<FormResponse>(
-      `${this.API_URL}/patient/${userId}?date=${date}`,
+      `${this.API_URL}/patient-date/${userId}/${date}`,
       { headers }
-    ).pipe(
-      catchError(error => {
-        if (error.status === 404) {
-          return of(null);
-        }
-        throw error;
-      })
+    );
+  }
+
+  getPatientFormByDate(patientId: string, date: string): Observable<FormResponse | null> {
+    const token = this.authService.getToken();
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.get<FormResponse>(
+      `${this.API_URL}/patient-date/${patientId}/${date}`,
+      { headers }
     );
   }
 

@@ -52,12 +52,9 @@ export class FormComponent implements OnInit {
 
     this.formService.getFormByDate(this.currentDate).subscribe({
       next: (formResponse) => {
-        // Handle if response is an array (backend returns array sometimes)
-        const form = Array.isArray(formResponse) && formResponse.length > 0 ? formResponse[0] : formResponse;
-
-        if (form && form.data) {
+        if (formResponse && formResponse.data) {
           try {
-            const formData = JSON.parse(form.data);
+            const formData = JSON.parse(formResponse.data);
 
             // Set values with a slight delay to ensure DOM is ready
             setTimeout(() => {

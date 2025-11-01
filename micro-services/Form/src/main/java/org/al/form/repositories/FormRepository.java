@@ -11,10 +11,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface FormRepository extends JpaRepository<Form, UUID> {
-    @Query(value = "SELECT * FROM forms WHERE patient_id = :patientId LIMIT :limit", nativeQuery = true)
+    @Query(value = "SELECT * FROM forms WHERE patient_id = :patientId ORDER BY date DESC LIMIT :limit", nativeQuery = true)
     List<Form> findTopByPatientId(@Param("patientId") UUID patientId, @Param("limit") int limit);
 
-    @Query(value = "SELECT * FROM forms WHERE issuer_id = :issuerId LIMIT :limit", nativeQuery = true)
+    @Query(value = "SELECT * FROM forms WHERE issuer_id = :issuerId ORDER BY date DESC LIMIT :limit", nativeQuery = true)
     List<Form> findTopByIssuerId(@Param("issuerId") UUID issuerId, @Param("limit") int limit);
 
     Optional<Form> findByPatientIdAndDate(UUID patientId, LocalDate date);

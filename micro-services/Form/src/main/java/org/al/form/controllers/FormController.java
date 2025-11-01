@@ -31,20 +31,21 @@ public class FormController {
     }
 
     @GetMapping("/patient/{patientId}")
-    public ResponseEntity<?> getFormsByPatient(
+    public List<FormResponse> getFormsByPatient(
             @PathVariable UUID patientId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(defaultValue = "10") int limit
     ) {
-        // If date is provided, return the specific form for that date
-        if (date != null) {
-            return service.getFormByPatientAndDate(patientId, date)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        }
+        return service.getFormsByPatient(patientId, limit);
+    }
 
-        // Otherwise return the list of forms
-        return ResponseEntity.ok(service.getFormsByPatient(patientId, limit));
+    @GetMapping("/patient-date/{patientId}/{date}")
+    public ResponseEntity<FormResponse> getFormByPatientAndDate(
+            @PathVariable UUID patientId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        return service.getFormByPatientAndDate(patientId, date)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.ok().build());  // Return 200 with empty body instead of 404
     }
 
     @GetMapping("/issuer/{issuerId}")
