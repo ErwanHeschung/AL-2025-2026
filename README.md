@@ -76,6 +76,20 @@ via docker-compose (exemple générique):
 
    * `bracelet` `iot_gateway` contiennent respectivement le code qui simule et reçoit les messages du bracelet. Lancer avec Node ou docker.
 
+## Scénario courant
+
+État actuel du PoC :
+
+* Communication : le bracelet et la gateway communiquent via WebSocket pour simuler le BLE.
+
+* Collecte et ingestion : la gateway envoie les données de capteurs vers Kafka (mesures brutes).
+
+* Traitement : les microservices consomment les messages Kafka et les enregistrent dans TimescaleDB.
+
+* Stockage et accès : les données sont historisées dans TimescaleDB et accessibles via l’interface web.
+
+* Formulaires : possibilité de créer et consulter des formulaires depuis l’interface web.
+
 ## Commandes utiles
 
 * `docker compose ps` — vérifier l'état des containers
