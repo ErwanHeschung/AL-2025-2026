@@ -1,11 +1,11 @@
-# Documentation générée — AL-2025-2026
+# Documentation — AL-2025-2026
 
-Ce document regroupe des fichiers markdown prêts à déposer dans le repo GitHub **ErwanHeschung/AL-2025-2026**. Il contient :
+Ce repository contient :
 
 * `README.md` — comment lancer / utiliser le projet (Quickstart + prerequis)
 * [CONTRIBUTING.md](docs/CONTRIBUTION.md) — règles de contribution
 * [ARCHITECTURE.md](docs/ARCHITECTURE.md) — description de l'architecture, justification technique et diagramme logique
-* [RISK_MATRIX.md](docs/RISK_MATRIX.md) — matrice d'analyse de risques (probabilité / impact / mitigation)
+* [RISK_MATRIX.md](docs/RISK_MATRIX.md) — matrice d'analyse de risques
 
 ## Context
 
