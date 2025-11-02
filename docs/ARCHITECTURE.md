@@ -515,3 +515,26 @@ Ensemble de services **Spring Boot** indépendants et conteneurisés, exposant d
 # Schema global
 
 ![global_archi](global_archi.png)
+
+## Justifications des choix technologiques
+
+### Bluetooth Low Energy (BLE)  
+BLE assure une communication locale à très faible consommation énergétique, essentielle pour prolonger l’autonomie du bracelet médical. Son chiffrement AES-CCM garantit la confidentialité et l’intégrité des données transmises, réduisant ainsi les risques d’interception ou de modification.
+
+### Apache Kafka  
+Kafka garantit une transmission asynchrone, fiable et scalable des données entre la passerelle IoT et les microservices. La réplication, les acknowledgements et le partitionnement assurent la persistance des messages, limitant le risque de perte de données. La séparation entre topics pour mesures et alertes permet un traitement prioritaire des urgences.
+
+### PostgreSQL avec JSONB  
+PostgreSQL offre une base relationnelle robuste pour gérer les données structurées des utilisateurs, tandis que JSONB permet de stocker des formulaires flexibles sans rigidité de schéma, répondant à la nécessité de flexibilité et d’intégrité.
+
+### TimescaleDB  
+Extension optimisée pour les séries temporelles, TimescaleDB est utilisée pour stocker et analyser efficacement les données biométriques continues et les alertes, assurant performance et scalabilité sur de gros volumes.
+
+### Communication REST sécurisée via API Gateway  
+REST, protocole simple et standard, est choisi pour les communications synchrones entre microservices. Associé au TLS, JWT et à une API Gateway centralisée, il garantit sécurité, contrôle des accès, gestion des erreurs, et facilite la maintenance. Kafka, plus complexe et asynchrone, est réservé aux flux critiques et massifs de données.
+
+### Conteneurisation Docker et orchestration Kubernetes  
+Ces technologies assurent résilience, scalabilité dynamique, auto-réparation des services et déploiements progressifs sans interruption, essentiels pour la disponibilité et la fiabilité dans un contexte médical exigeant.
+
+### Frameworks Angular et Spring Boot  
+Angular offre une interface utilisateur réactive, sécurisée et maintenable. Spring Boot fournit une architecture back-end modulaire, performante et facilement intégrable aux autres composants du système, réduisant les risques liés à la stabilité et à la sécurité.
