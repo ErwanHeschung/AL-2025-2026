@@ -47,12 +47,11 @@ AL-2025-2026/
    cd AL-2025-2026
     ```
 
-2. Lancer les dépendances (Kafka, Zookeeper, base si nécessaire)
-via docker-compose (exemple générique):
+2. Lancer les dépendances (Kafka, Zookeeper, KafkaUI)
+via docker-compose:
 
    ```bash
-   docker compose -f infra/docker-compose.yml up -d
-   # si infra absent: docker compose up -d (ou consultez le dossier kafka)
+   docker compose -f kafka/docker-compose.yml up -d
    ```
 3. Construire et lancer les micro-services Java:
 
