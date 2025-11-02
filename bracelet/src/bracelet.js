@@ -1,7 +1,11 @@
 import { WebSocket } from 'ws';
 
-function generateRandom(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min
+/* Generate random */
+
+function randomNormal(mean, standardDeviation) {
+  const u = Math.random();
+  const v = Math.random();
+  return mean + standardDeviation * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 }
 
 
@@ -10,15 +14,15 @@ function generateRandom(min, max) {
 const SERIAL_NUMBER = Array.from({length: 3}, () => Math.floor(Math.random() * 0x10000).toString(16).padStart(4, '0').toUpperCase()).join('-');
 
 function getHeartRate() {
-    return Math.floor(generateRandom(60, 100));
+  return Math.round(Math.min(Math.max(randomNormal(75, 10), 40), 160));
 }
 
 function getBloodOxygen() {
-    return Math.floor(generateRandom(95, 100));
+  return parseFloat(Math.min(Math.max(randomNormal(96, 1), 85), 100).toFixed(2));
 }
 
 function getAccelerometer() {
-    const random = () => generateRandom(-1, 1);
+    const random = () => randomNormal(0, 0.05);
     return {
         x: parseFloat(random().toFixed(2)),
         y: parseFloat(random().toFixed(2)),
