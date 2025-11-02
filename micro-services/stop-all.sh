@@ -14,4 +14,7 @@ docker-compose -p "$PROJECT_NAME" -f Gateway/docker-compose.yml down
 echo "Stopping Form service..."
 docker-compose -p "$PROJECT_NAME" -f Form/docker-compose.yml down
 
+echo "Stopping DataProcessing service..."
+docker-compose -p "$PROJECT_NAME" -f DataProcessing/docker-compose.yml down
+
 echo "All services stopped!"

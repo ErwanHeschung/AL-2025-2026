@@ -24,7 +24,7 @@ services:
     container_name: al-app
     build: .
     ports:
-      - "8084:8084"
+      - "8083:8083"
     networks:
       - kafka-net
     environment:

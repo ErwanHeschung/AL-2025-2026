@@ -13,6 +13,7 @@ docker-compose -p "$PROJECT_NAME" \
   -f PatientManagement/docker-compose.yml \
   -f Gateway/docker-compose.yml \
   -f Form/docker-compose.yml \
+  -f DataProcessing/docker-compose.yml \
   up -d --remove-orphans
 
 echo "All services are up!"

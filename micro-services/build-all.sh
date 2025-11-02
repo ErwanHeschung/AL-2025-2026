@@ -16,5 +16,7 @@ docker-compose -p "$PROJECT_NAME" -f Gateway/docker-compose.yml build
 echo "Building Form service..."
 docker-compose -p "$PROJECT_NAME" -f Form/docker-compose.yml build
 
+echo "Building DataProcessing service..."
+docker-compose -p "$PROJECT_NAME" -f DataProcessing/docker-compose.yml build
 
 echo "All images built!"
