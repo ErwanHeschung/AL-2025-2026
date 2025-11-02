@@ -287,9 +287,10 @@ GW -->|Topic: alert - données critiques| K
 
 **Schéma :**
 ```mermaid
-GW[IoT Gateway] -->|Topic: captor_name - mesures brutes| K[Kafka Cluster]
-GW -->|Topic: alert - données critiques| K
-K -->|Consommation asynchrone| MS[Microservices]
+graph TD
+    GW[IoT Gateway] -->|Topic: captor_name - mesures brutes| K[Kafka Cluster]
+    GW -->|Topic: alert - données critiques| K
+    K -->|Consommation asynchrone| MS[Microservices]
 ```
 
 ## Microservices
@@ -513,4 +514,4 @@ Ensemble de services **Spring Boot** indépendants et conteneurisés, exposant d
 
 # Schema global
 
-![global_archi](image.png)
+![global_archi](global_archi.png)
