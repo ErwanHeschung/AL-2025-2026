@@ -1,6 +1,6 @@
 # Documentation — AL-2025-2026
 
-Ce document regroupe des fichiers markdown prêts à déposer dans le repo GitHub **ErwanHeschung/AL-2025-2026**. Il contient :
+Ce repository contient :
 
 * `README.md` — comment lancer / utiliser le projet (Quickstart + prerequis)
 * [CONTRIBUTING.md](docs/CONTRIBUTION.md) — règles de contribution
