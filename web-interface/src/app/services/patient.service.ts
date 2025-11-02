@@ -10,6 +10,13 @@ export interface Patient {
   email: string;
 }
 
+export interface PatientRecord {
+  timestamp: string;
+  bpm: number;
+  bloodOxygen: number;
+  activity: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -36,6 +43,19 @@ export class PatientService {
     });
 
     return this.http.get<Patient[]>(this.API_URL, { headers });
+  }
+
+  getPatientRecords(patientId: string, startDate: string, endDate: string, limit: number = 50): Observable<PatientRecord[]> {
+    const params = {
+      startDate,
+      endDate,
+      limit: limit.toString()
+    };
+
+    return this.http.get<PatientRecord[]>(
+      `${this.API_URL}/${patientId}/records`,
+      { params }
+    );
   }
 
   private decodeToken(token: string): any {

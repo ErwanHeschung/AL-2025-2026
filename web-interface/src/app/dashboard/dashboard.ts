@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { HealthDataService, QuestionnaireResponse, DailyMedicalData, HourlyData } from '../services/health-data';
-import { PatientService, Patient } from '../services/patient.service';
+import { PatientService, Patient, PatientRecord } from '../services/patient.service';
 import { FormService } from '../services/form.service';
 
 interface MetricStats {
@@ -86,17 +86,25 @@ export class DashboardComponent implements OnInit {
         } else {
           this.questionnaireData = null;
         }
-
-        // Load medical data (still from mock service for now)
-        this.medicalData = this.healthDataService.getMedicalData(this.selectedDate);
-
-        if (this.medicalData) {
-          this.calculateStats();
-        }
       },
       error: (error) => {
         console.error('Error loading form data:', error);
         this.questionnaireData = null;
+      }
+    });
+
+    // Load medical data from backend
+    this.patientService.getPatientRecords(this.selectedPatientId, this.selectedDate, this.selectedDate, 24).subscribe({
+      next: (records) => {
+        if (records && records.length > 0) {
+          this.medicalData = this.convertRecordsToDailyData(records);
+          this.calculateStats();
+        } else {
+          this.medicalData = null;
+        }
+      },
+      error: (error) => {
+        console.error('Error loading patient records:', error);
         this.medicalData = null;
       }
     });
@@ -196,5 +204,37 @@ export class DashboardComponent implements OnInit {
     if (activity < 30) return { color: 'blue', label: 'Low', badge: 'low' };
     if (activity < 60) return { color: 'orange', label: 'Moderate', badge: 'moderate' };
     return { color: 'red', label: 'High', badge: 'high' };
+  }
+
+  private convertRecordsToDailyData(records: PatientRecord[]): DailyMedicalData {
+    const hourlyData: HourlyData[] = records.map(record => {
+      const timestamp = new Date(record.timestamp);
+      const hour = `${timestamp.getHours().toString().padStart(2, '0')}:00`;
+
+      return {
+        hour,
+        heartRate: Math.round(record.bpm),
+        spo2: Math.round(record.bloodOxygen),
+        activity: this.activityToNumber(record.activity)
+      };
+    });
+
+    return {
+      date: this.selectedDate,
+      hourlyData
+    };
+  }
+
+  private activityToNumber(activity: string): number {
+    switch (activity.toUpperCase()) {
+      case 'LOW':
+        return 20;
+      case 'MEDIUM':
+        return 50;
+      case 'HIGH':
+        return 80;
+      default:
+        return 0;
+    }
   }
 }

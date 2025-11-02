@@ -12,7 +12,7 @@ import java.time.Instant;
 @AllArgsConstructor
 public class PatientRecordSummaryDTO {
     private Instant timestamp;
-    private int bpm;
-    private double sp02;
+    private double bpm;
+    private double bloodOxygen;
     private Activity activity;
 }

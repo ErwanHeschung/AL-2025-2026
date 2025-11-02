@@ -31,7 +31,10 @@ public class PatientService implements IPatientService {
 
     @Override
     public List<PatientRecordSummaryDTO> getPatientRecords(UUID patientId, LocalDate startDate, LocalDate endDate, int limit) {
-        //TODO retrive from patient data and map bracelet id to patient ID;
-        return List.of();
+        PatientDTO patient = userClient.getUserById(patientId);
+        if (patient.getBraceletId() == null) {
+            return List.of();
+        }
+        return processDataClient.getPatientRecords(patient.getBraceletId(), startDate, endDate, limit);
     }
 }

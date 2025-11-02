@@ -4,6 +4,8 @@ networks:
   kafka-net:
     external: true
     name: kafka-network
+  microservices-net:
+    external: true
 
 services:
   timescaledb:
@@ -20,13 +22,15 @@ services:
       - timescaledb_data:/var/lib/postgresql/data
     networks:
       - kafka-net
-  app-consumer:
-    container_name: al-app
+      - microservices-net
+  data-processing-service:
+    container_name: data-processing-service
     build: .
     ports:
       - "8083:8083"
     networks:
       - kafka-net
+      - microservices-net
     environment:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       KAFKA_TOPIC: topic

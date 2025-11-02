@@ -27,7 +27,7 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
       USER_SERVICE_URL: http://user-service:8080
-      PROCESS_DATA_SERVICE_URL: http://data-processing-service:8082
+      PROCESS_DATA_SERVICE_URL: http://data-processing-service:8083
     depends_on:
       patient-management-db:
         condition: service_healthy
