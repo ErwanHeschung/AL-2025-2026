@@ -53,13 +53,13 @@ Lancez `run-all.sh` à la racine du projet pour lancer tout les composants.
 
 ### Manuellement :
 
-2. Lancer les dépendances (Kafka, Zookeeper, KafkaUI)
+1. Lancer les dépendances (Kafka, Zookeeper, KafkaUI)
 via docker-compose:
 
    ```bash
    docker compose -f kafka/docker-compose.yml up -d
    ```
-3. Construire et lancer les micro-services Java:
+2. Construire et lancer les micro-services Java:
 
     Lancer chaque projet microservices avec Maven via console ou Intellij
 
@@ -70,14 +70,14 @@ via docker-compose:
     * `stop-all.sh`
 
 
-4. Lancer la web-interface:
+3. Lancer la web-interface:
 
    ```bash
    cd web-interface
    npm install
    npm start
    ```
-5. Lancer les composants IoT / simulateurs:
+4. Lancer les composants IoT / simulateurs:
 
    * `iot_gateway` `bracelet` contiennent respectivement le code qui reçoit les messages du bracelet et le code qui simule et le code qui simule. Lancer avec Node ou docker.
 
