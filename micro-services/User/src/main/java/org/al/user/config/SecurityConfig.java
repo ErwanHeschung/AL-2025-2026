@@ -20,12 +20,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .anyRequest().permitAll()
-                );
-
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+                //Auth is done in gateway, no check here
         return http.build();
     }
-
 }
