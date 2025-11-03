@@ -3,7 +3,7 @@
 Ce repository contient :
 
 * `README.md` — comment lancer / utiliser le projet (Quickstart + prerequis)
-* [Context.md](docs/CONTEXT.md) — Contexte, Hypthèses et user stories
+* [Context.md](docs/CONTEXT.md) — Contexte, Hypthèses et user stories, solution et DDD
 * [CONTRIBUTING.md](docs/CONTRIBUTION.md) — règles de contribution
 * [ARCHITECTURE.md](docs/ARCHITECTURE.md) — description de l'architecture, justification technique et diagramme logique
 * [RISK_MATRIX.md](docs/RISK_MATRIX.md) — matrice d'analyse de risques
