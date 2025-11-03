@@ -3,6 +3,7 @@
 Ce repository contient :
 
 * `README.md` — comment lancer / utiliser le projet (Quickstart + prerequis)
+* [Context.md](docs/CONTEXT.md) — Contexte, Hypthèses et user stories
 * [CONTRIBUTING.md](docs/CONTRIBUTION.md) — règles de contribution
 * [ARCHITECTURE.md](docs/ARCHITECTURE.md) — description de l'architecture, justification technique et diagramme logique
 * [RISK_MATRIX.md](docs/RISK_MATRIX.md) — matrice d'analyse de risques
@@ -53,13 +54,13 @@ Lancez `run-all.sh` à la racine du projet pour lancer tout les composants.
 
 ### Manuellement :
 
-2. Lancer les dépendances (Kafka, Zookeeper, KafkaUI)
+1. Lancer les dépendances (Kafka, Zookeeper, KafkaUI)
 via docker-compose:
 
    ```bash
    docker compose -f kafka/docker-compose.yml up -d
    ```
-3. Construire et lancer les micro-services Java:
+2. Construire et lancer les micro-services Java:
 
     Lancer chaque projet microservices avec Maven via console ou Intellij
 
@@ -70,14 +71,14 @@ via docker-compose:
     * `stop-all.sh`
 
 
-4. Lancer la web-interface:
+3. Lancer la web-interface:
 
    ```bash
    cd web-interface
    npm install
    npm start
    ```
-5. Lancer les composants IoT / simulateurs:
+4. Lancer les composants IoT / simulateurs:
 
    * `iot_gateway` `bracelet` contiennent respectivement le code qui reçoit les messages du bracelet et le code qui simule et le code qui simule. Lancer avec Node ou docker.
 
@@ -87,16 +88,19 @@ via docker-compose:
 
 * Communication : le bracelet et la gateway communiquent via WebSocket pour simuler le BLE.
 
-* Collecte et ingestion : la gateway envoie les données de capteurs vers Kafka (mesures brutes).
+* Collecte et ingestion : l'iot gateway envoie les données de capteurs vers Kafka (mesures brutes).
 
 * Traitement : les microservices consomment les messages Kafka et les enregistrent dans TimescaleDB.
 
-* Stockage et accès : les données sont historisées dans TimescaleDB et accessibles via l’interface web.
+* Stockage et accès : les données sont historisées dans TimescaleDB et accessibles via l’interface web sous forme de moyennes.
 
-* Formulaires : possibilité de créer et consulter des formulaires depuis l’interface web.
+* Formulaires : possibilité de créer (patient) et consulter (docteur) des formulaires depuis l’interface web.
+  
+* Données capteur : possibilité de consulter des données capteurs via des graphique et historique depuis l’interface web, en tant que docteur.
 
-## Commandes utiles
+## Informations utiles
 
+* l'interface web est disponible en local a l'adresse : localhost:4200
 * `docker compose ps` — vérifier l'état des containers
 
 ## TODO
