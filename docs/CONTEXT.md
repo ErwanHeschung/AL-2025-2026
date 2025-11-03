@@ -1,24 +1,18 @@
+# Table des matières
+
+1. [Contexte](#contexte)  
+2. [Hypothèses](#hypotheses)  
+3. [User Stories](#user-stories)  
+4. [Notre solution](#notre-solution)  
+5. [Justification](#justification)  
+6. [Domaine Driven Development](#domaine-driven-development)  
+
 ## Contexte
 
-La solution proposée s’inscrit dans le domaine de l’e-santé avec un focus particulier sur le suivi préventif des patients souffrant d’insuffisance cardiaque. Elle vise à permettre aux personnes âgées de rester à domicile tout en bénéficiant d’un suivi médical fiable et continu sur plusieurs jours.  
-
-Le dispositif collecte en continu les données physiologiques clés telles que la fréquence cardiaque (BPM), la saturation en oxygène (SpO₂) et l’activité physique. Pour le flux de données classique (hors alertes), une moyenne horaire est calculée afin de fournir une vision synthétique et pertinente de l’état du patient. Cette surveillance régulière a pour but principal la prévention, en détectant précocement des signes avant-coureurs d’aggravation et en évitant les décompensations sévères.  
-
-Intégrée dans un écosystème de soins existant, la solution facilite la collaboration entre médecins, infirmiers et proches aidants. L’interface web centralise l’accès aux données, permet la configuration des seuils d’alerte personnalisés et offre un outil de gestion des patients adapté aux contraintes et exigences du milieu médical. La communication reste qualifiée d’orale et directe, la plateforme servant principalement d’outil d’aide à la décision et de suivi.  
-
-Cette approche professionnelle garantit un accompagnement sécurisé, fiable, axé sur la prévention et adapté aux besoins spécifiques des patients atteints d’insuffisance cardiaque.
-
-## Justification des capteurs et de l’affichage
-
-Le choix des capteurs se concentre sur la fréquence cardiaque (BPM), la saturation en oxygène (SpO₂) et l’activité physique, car ces mesures sont essentielles pour monitorer l’état des patients atteints d’insuffisance cardiaque.  
-
-- **Fréquence cardiaque (BPM) :** Indicateur clé du rythme cardiaque, sa surveillance permet de détecter des anomalies comme la tachycardie ou la bradycardie, qui peuvent précéder une décompensation.  
-- **Saturation en oxygène (SpO₂) :** Mesure critique pour évaluer la capacité respiratoire et la qualité de l’oxygénation sanguine, essentielle dans ce contexte pathologique.  
-- **Activité physique (accéléromètre) :** Permet d’évaluer le niveau d’activité et mobilité du patient, indicateurs indirects de son état général et de sa capacité fonctionnelle.  
-
-L’affichage des données dans l’interface web est conçu pour être synthétique et pertinent, avec une moyenne horaire sur le flux classique afin de limiter le bruit et faciliter la prise de décision médicale. Les alertes critiques sont mises en avant en temps réel afin de garantir une réaction rapide en cas d’urgence.
-
-Cette combinaison capteurs/affichage offre un équilibre entre précision, pertinence et simplicité, adapté aux contraintes d’utilisation par des patients âgés et à la charge de travail du personnel médical.
+Dans une population vieillissante, la prévention et le suivi à domicile des pathologies chroniques, notamment l’insuffisance cardiaque, représentent un enjeu majeur de santé publique.  
+Les systèmes actuels doivent permettre aux patients de rester chez eux tout en assurant une surveillance fiable, continue et sécurisée de leurs paramètres physiologiques.  
+Ce suivi vise à détecter précocement des dégradations de l’état de santé, éviter les hospitalisations évitables et faciliter la coordination entre professionnels de santé, patients et proches aidants.  
+L’objectif est d’améliorer la qualité de vie des patients tout en optimisant la prise en charge médicale grâce à un accès synthétique mais pertinent aux données essentielles.
 
 ## Hypotheses
 
@@ -84,3 +78,65 @@ Cette combinaison capteurs/affichage offre un équilibre entre précision, perti
 * En tant qu’équipe de développement et exploitation, je peux effectuer des mises à jour à distance des bracelets et de la plateforme web afin de maintenir la sécurité et les fonctionnalités à jour.  
 * En tant qu’équipe de développement et exploitation, je peux détecter les anomalies ou pannes (ex : dispositif déconnecté, données non envoyées) afin d’alerter l’utilisateur ou le support.  
 * En tant qu’équipe de développement et exploitation, je peux fournir aux médecins des options pour configurer précisément quelles données sont collectées pour chaque patient afin que le système s’adapte aux besoins médicaux.  
+
+## Notre solution
+
+Notre solution propose un dispositif connecté centré sur la prévention et le suivi des insuffisants cardiaques à domicile.  
+Le système collecte plusieurs données physiologiques clés : fréquence cardiaque (BPM), saturation en oxygène (SpO₂) et niveau d’activité physique.  
+Ces mesures sont choisies pour leur pertinence médicale dans la détection précoce de risques d’aggravation.  
+
+Pour le suivi continu, une moyenne horaire des données est calculée afin de limiter le volume d’informations tout en conservant une bonne visibilité sur l’état du patient.  
+Les alertes générées lors du dépassement de seuils critiques déclenchent une notification immédiate par courrier électronique à destination des professionnels de santé et des aidants concernés, assurant ainsi une prise en charge rapide.  
+L’interface utilisateur est conçue pour être claire, synthétique et accessible, facilitant l’interprétation des données par les professionnels de santé et les aidants.
+
+Le flux classique de données permet un suivi continu et sécurisé des patients, tandis que le système d’alerte garantit la réactivité en cas d’urgence.
+
+## Justification
+
+Cette architecture combine précision des mesures, simplicité d’usage et réactivité dans le pilotage préventif des patients insuffisants cardiaques.  
+
+- La collecte des données physiologiques critiques (BPM, SpO₂, activité) est adaptée à la surveillance spécifique de cette pathologie.  
+- La moyenne horaire favorise la clarté des données transmises et limite la surcharge informationnelle pour les équipes médicales.  
+- La notification par mail des alertes critiques assure un relais efficace vers les médecins et aidants, améliorant la sécurité du patient et la rapidité d’intervention.  
+- L’interface utilisateur intuitive garantit un accès facile aux informations, y compris pour les aidants peu familiers avec les outils numériques.
+
+L’affichage des données dans l’interface web est conçu pour être synthétique et pertinent, avec une moyenne horaire sur le flux classique afin de limiter le bruit et faciliter la prise de décision médicale. Les alertes critiques sont mises en avant en temps réel afin de garantir une réaction rapide en cas d’urgence.  
+Cette combinaison capteurs/affichage offre un équilibre entre précision, pertinence et simplicité, adapté aux contraintes d’utilisation par des patients âgés et à la charge de travail du personnel médical.
+
+## Domaine Driven Development
+
+### Core Domain (Domaine principal)  
+C’est le coeur métier différenciateur qui apporte de la valeur clinique essentielle :  
+- **Gestion des alertes médicales et détection d’anomalies**  
+  - Logique de détection des seuils critiques sur les données physiologiques (BPM, SpO₂, activité).  
+  - Notification en temps réel (emails, alertes web) aux soignants et proches.  
+  - Traitement et historisation des alertes pour suivi et audit médical.  
+- **Modélisation du patient et suivi personnalisé**  
+  - Agrégation des données patients, paramétrage individuel des seuils, gestion des profils.  
+  - Formulaires médicaux liés aux suivis cliniques et décisions médicales.
+
+---
+
+### Supporting Domain (Domaine de support)  
+Domaines nécessaires pour soutenir le Core Domain tout en apportant une expertise fonctionnelle spécifique :  
+- **Collecte et traitement des données IoT**  
+  - Passerelle IoT, communication sécurisée avec le bracelet.  
+  - Ingestion et normalisation des données physiologiques en temps réel.  
+  - Stockage performant de séries temporelles (TimescaleDB).  
+- **Gestion des utilisateurs et authentification**  
+  - Contrôle des accès, gestion des rôles (médecin, infirmier, patient, proche).  
+  - Administration sécurisée des comptes et permissions.  
+
+---
+
+### Generic Domain (Domaine générique)  
+Fonctionnalités transverses et génériques, réutilisables dans différents contextes métiers :  
+- **Infrastructure technique**  
+  - Orchestration Kubernetes, déploiement continu, surveillance (Prometheus, Grafana).  
+  - Messagerie asynchrone (Kafka), base de données relationnelle (PostgreSQL).  
+- **Web Interface et API Gateway**  
+  - Interface utilisateur générique pour consultation et configuration.  
+  - Gateway centralisant l’authentification et le routage entre services.  
+- **Logging, monitoring et sécurité**  
+  - Gestion des logs, traçabilité, chiffrement TLS, rotation des clés, sauvegardes.
+
