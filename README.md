@@ -28,7 +28,7 @@ AL-2025-2026/
 ├─ iot_gateway/ # passerelle IoT (ingestion, prétraitement)
 ├─ kafka/ # scripts/configuration Kafka (topics, docker-compose)
 ├─ micro-services/ # plusieurs services Java (API REST, consumer Kafka)
-├─ web-interface/ # front-end TypeScript/HTML/CSS
+├─ web-interface/ # front-end Angular TypeScript/HTML/CSS
 ├─ .gitignore
 ├─ README.md
  ```
@@ -46,6 +46,12 @@ AL-2025-2026/
    git clone https://github.com/ErwanHeschung/AL-2025-2026.git
    cd AL-2025-2026
     ```
+
+### Docker :
+
+Lancez `run-all.sh` à la racine du projet pour lancer tout les composants.
+
+### Manuellement :
 
 2. Lancer les dépendances (Kafka, Zookeeper, KafkaUI)
 via docker-compose:
@@ -73,7 +79,7 @@ via docker-compose:
    ```
 5. Lancer les composants IoT / simulateurs:
 
-   * `bracelet` `iot_gateway` contiennent respectivement le code qui simule et reçoit les messages du bracelet. Lancer avec Node ou docker.
+   * `iot_gateway` `bracelet` contiennent respectivement le code qui reçoit les messages du bracelet et le code qui simule et le code qui simule. Lancer avec Node ou docker.
 
 ## Scénario courant
 
@@ -95,6 +101,5 @@ via docker-compose:
 
 ## TODO
 
-* Avoir un script pour lancer tout le projet
 * Flow d'alerte 
 
