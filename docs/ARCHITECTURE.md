@@ -24,23 +24,23 @@ graph TD
 subgraph Edge["🏠 Edge"]
     B[Bracelet<br/>Capteur]
     GW[IoT Gateway<br/>Passerelle de communication]
-    B --> GW
+    B -->|BLE| GW
 end
 
 subgraph Fog["☁️ Fog"]
-    K[Kafka<br/> File de messages]
-    GW --> K
+    K[Kafka<br/>File de messages]
+    GW -->|Kafka Protocol| K
 end
 
 subgraph Cloud["☁️☁️ Cloud"]
     MS[Micro-services<br/>Java Spring Boot]
     UI[Web Interface<br/>Angular Front-end]
 
-    MS --> UI
+    MS -->|REST / HTTP| UI
 end
 
-UI -->|Requêtes REST| MS
-MS -->|Événements| K
+UI -->|REST / HTTP| MS
+MS -->|Kafka Protocol| K
 ```
 ---
 
