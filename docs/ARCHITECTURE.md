@@ -123,6 +123,11 @@ MS -->|Événements| K
 - **BPM (heartRate)** : fréquence cardiaque (toutes les 5s).  
 - **Oxygène (bloodOxygen)** : saturation en oxygène SpO₂ (toutes les 10s).  
 
+**Capteurs embarqués :**
+- **MAX86150** : capteur optique PPG (Photopléthysmographie) utilisé pour la mesure de la fréquence cardiaque (BPM) et de la saturation en oxygène (SpO₂).  
+- **LSM6DS3** : accéléromètre triaxial permettant de détecter l'activité physique et les mouvements du porteur avec une haute fréquence d'échantillonnage.  
+
+
 **Mécanismes :**
 
 - **Workflow :**
@@ -133,6 +138,16 @@ MS -->|Événements| K
   - Messages envoyés individuellement ou en **batch** en cas de perte de connectivité avec kafka.  
   - ACK ou confirmation de réception pour garantir la fiabilité.  
     - **Justification :** Assure que les données critiques physiologiques ne sont pas perdues et permet un suivi précis.  
+  
+--- 
+
+- **Appairage et indicateur visuel :**
+  - L’appairage BLE se fait selon un protocole sécurisé impliquant un processus d’authentification mutuelle entre le bracelet et la gateway.  
+  - **Voyant LED de pairing :** Le bracelet est équipé d’un voyant lumineux indiquant l’état d’appairage :  
+    - Clignotement rapide : mode appairage actif, attendant qu’un utilisateur clique pour accepter la connexion.  
+    - Vert fixe : appairage réussi et connexion établie.  
+    - Rouge fixe ou absence de lumière : appairage échoué ou non connecté.  
+  - L’utilisateur doit valider l’appairage via une action manuelle (clic sur un bouton physique) pour éviter un appairage automatique non souhaité, renforçant la sécurité et le contrôle utilisateur.  
 
 ---
 
@@ -167,130 +182,248 @@ MS -->|Événements| K
 **Schéma :**
 ```mermaid
 graph TD
-B[Bracelet BLE] -->|Accélér., BPM, Oxygène| GW[IoT Gateway]
+subgraph B[Bracelet BLE]
+    C1[MAX86150<br>PPG / SpO₂ & BPM]
+    C2[LSM6DS3<br>Accéléromètre]
+end
+
+%% Flèches individuelles vers la gateway
+C1 --> GW[IoT Gateway]
+C2 --> GW
+
 ```
 
 ### 3.2 IoT Gateway
 
-**Rôle :** passerelle entre les bracelets publication des données sur Kafka.
-
-**Mécanismes :**
-
-- **Workflow :**
-  - Reçoit les données des bracelets via **BLE**.  
-  - Conversion et normalisation des mesures en **JSON**.  
-  - Publication sur les topics Kafka :  
-    - `captor_name` : données brutes issues des capteurs (Accéléromètre, BPM, Oxygène).  
-    - `alert` : alertes médicales détectées en local (ex. rythme cardiaque anormal, oxygénation faible, chute).  
-  - Envoi d’un **ACK** vers le bracelet après réception et validation des données.  
-  - **Justification :** la séparation entre `captor_name` et `alert` permet un routage prioritaire des urgences sans surcharger le flux principal de télémétrie.
+**Rôle :** passerelle centralisant les données des bracelets Bluetooth Low Energy, assurant leur réception, sécurisation, normalisation et publication sur Kafka via une connexion réseau filaire.
 
 ---
 
-- **Sécurité :**
-  - Connexion BLE sécurisée avec chiffrement **AES-CCM**.  
-  - Connexion à Kafka via **SASL_SSL** pour authentification et chiffrement des échanges.  
-  - Validation du schéma JSON et contrôle d’intégrité avant envoi.  
-  - **Justification :** ces mécanismes garantissent que seules des données fiables et authentifiées sont propagées vers le Cloud.
+### Mécanismes
+
+* **Flux de travail :**
+
+  * Reçoit les données des bracelets via **Bluetooth Low Energy** (données des capteurs et signaux d’appairage).
+
+    * **Justification :** BLE est peu consommateur d’énergie et permet une communication locale fiable entre le bracelet et la gateway.
+
+  * Gestion de l’état d’appairage Bluetooth Low Energy :
+
+    * `Etat appairage Bluetooth Low Energy` correspond au statut de l’appairage (en attente, appairé, erreur)
+    * Communication avec le bracelet pour contrôle du bouton de mise en appairage et retour LED.
+
+      * **Justification :** Permet de suivre le statut de chaque bracelet, d’initier l’appairage de manière sécurisée et de fournir un retour utilisateur visuel, essentiel pour la mise en service.
+
+  * Module Bluetooth Low Energy (`Module Bluetooth Low Energy`) reçoit les mesures brutes des capteurs et transmet les données vers le tampon.
+
+    * **Justification :** Centralise la réception et prépare les données pour traitement, en séparant le flux de contrôle (appairage) du flux de données.
+
+  * Tampon local (`Buffer`) pour stockage temporaire et gestion des tentatives de renvoi ou regroupement des messages en cas de perte de connectivité.
+
+    * **Justification :** Garantit la continuité des flux de données même en cas de problème réseau ou Kafka temporairement indisponible.
+
+  * Déchiffrement et vérification d’intégrité (`Déchiffrement et vérification du code de contrôle`) pour garantir confidentialité et exactitude des données.
+
+    * **Justification :** Assure que les données physiologiques ne sont pas interceptées ou corrompues avant d’être envoyées vers le cloud.
+
+  * Transmission via réseau (`Ethernet`) vers Kafka Cloud.
+
+    * **Justification :** Ethernet fournit une connexion stable et performante, essentielle pour la fiabilité des flux de données critiques.
+
+  * Publication sur les sujets Kafka (`captor_name`) avec les données brutes des capteurs.
+
+    * **Justification :** Permet l’organisation et la consommation des données dans le cloud de manière structurée et évolutive.
+
+  * Accusé de réception envoyé au bracelet après validation et sécurisation des messages.
+
+    * **Justification :** Confirme au bracelet que les données ont été reçues et traitées, évitant toute perte d’information.
 
 ---
 
-- **Fiabilité :**
-  - Buffer local (en RAM ou fichier) pour stocker temporairement les mesures en cas de perte de connectivité Kafka.  
-  - Retry exponentiel pour les envois échoués.  
-  - Reconnexion BLE automatique.  
-  - **Justification :** permet une continuité du flux de données même en cas d’incident réseau ou matériel.
+* **Sécurité :**
+
+  * Chiffrement Bluetooth Low Energy avec **AES-CCM** entre bracelet et passerelle.
+
+    * **Justification :** Garantit la confidentialité des données sensibles (BPM, SpO₂, accéléromètre).
+
+  * Authentification et chiffrement via **TLS avec SASL_SSL** pour la communication vers Kafka.
+
+    * **Justification :** Empêche les accès non autorisés au cloud et assure l’intégrité des messages pendant le transport.
+
+  * Contrôle d’intégrité via code de contrôle et validation des schémas JSON.
+
+    * **Justification :** Assure que les données reçues sont conformes au format attendu et n’ont pas été corrompues.
+
+  * Séparation des flux Bluetooth Low Energy et réseau pour limiter les risques d’intrusion.
+
+    * **Justification :** Contient les risques de compromission et protège la gateway et le cloud contre les attaques externes.
 
 ---
 
-- **Déploiement :**
-  - Conteneur Docker léger (ARM/x86 compatible).  
-  - Configuration via variables d’environnement (Kafka brokers, topics, seuils d’alerte, fréquence de polling).  
-  - Healthchecks actifs pour supervision par orchestrateur (Docker Compose).  
-  - **Justification :** assure un déploiement homogène sur différentes passerelles physiques tout en simplifiant la maintenance.
+* **Fiabilité :**
+
+  * Tampon local pour assurer la continuité des données même en cas d’indisponibilité réseau.
+
+    * **Justification :** Évite la perte de données en cas d’incident réseau ou serveur temporairement indisponible.
+
+  * Tentatives automatiques de renvoi avec temporisation progressive et journalisation des échecs.
+
+    * **Justification :** Permet de gérer les interruptions temporaires et de diagnostiquer facilement les incidents.
+
+  * Reconnexion automatique Bluetooth Low Energy avec les bracelets en cas de déconnexion.
+
+    * **Justification :** Maintient le lien avec le bracelet sans intervention manuelle, assurant la continuité des mesures.
+
+  * Surveillance continue des interfaces réseau Ethernet et Wi-Fi pour basculement automatique si nécessaire.
+
+    * **Justification :** Garantit la disponibilité et la fiabilité des flux de données en choisissant le meilleur canal réseau disponible.
 
 ---
 
-- **Monitoring :**
-  - Export métriques vers Prometheus : taux de messages traités, taux d’erreurs, latence BLE, backlog Kafka.  
-  - Logs structurés au format JSON.  
-  - Alertes techniques si déconnexion prolongée ou fréquence de publication anormale.  
-  - **Justification :** visibilité complète du pipeline IoT et détection proactive des pannes.
+* **Déploiement :**
+
+  * Conteneur Docker léger, compatible avec les architectures ARM et x86.
+
+    * **Justification :** Facilite l’installation et la portabilité sur différents types de passerelles physiques.
+
+  * Paramétrable via variables d’environnement : adresses et ports des brokers Kafka, sujets Kafka, paramètres Bluetooth Low Energy.
+
+    * **Justification :** Permet d’adapter rapidement la configuration à différents environnements ou besoins opérationnels.
+
+---
+
+* **Supervision :**
+
+  * Export des métriques vers Prometheus incluant : taux de messages reçus et traités, taux d’erreurs, latence des connexions Bluetooth Low Energy et réseau, taille du tampon.
+
+    * **Justification :** Permet un suivi précis des performances et détecte rapidement les anomalies.
+
+  * Journalisation structurée au format JSON pour corrélation avec les métriques et diagnostic.
+
+    * **Justification :** Facilite l’analyse et la corrélation des événements pour anticiper ou résoudre rapidement les problèmes.
 
 ---
 
 **Schéma :**
+
 ```mermaid
 graph TD
-B[Bracelet BLE] -->|Accélér., BPM, Oxygène| GW[IoT Gateway]
-GW -->|Topic: captor_name - mesures brutes| K[Kafka]
-GW -->|Topic: alert - données critiques| K
+%% Bracelet simplifié
+B[Bracelet Bluetooth Low Energy]
+
+%% Composants internes de la passerelle
+subgraph Passerelle IoT[IoT Gateway]
+    BLE[Module Bluetooth Low Energy]
+    RESEAU[Connexion Ethernet]
+    APPAIRAGE[Etat appairage Bluetooth Low Energy]
+    TAMPON[Tampon pour stockage et retry]
+    SECURITE[Déchiffrement]
+end
+
+%% Flux du bracelet vers la passerelle avec protocoles
+B -->|Bluetooth Low Energy / Appairage| APPAIRAGE
+B -->|Bluetooth Low Energy / Données des capteurs| BLE
+
+%% Flux internes de la passerelle vers Kafka
+BLE -->|Données brutes| TAMPON
+TAMPON -->|Messages sécurisés| SECURITE
+SECURITE -->|Transmission TCP| RESEAU
+RESEAU -->|Protocole Kafka| K[Kafka Cloud]
 ```
 
 ### 3.3 Kafka
 
-**Rôle :** middleware assurant la transmission fiable, asynchrone et distribuée des données entre la couche IoT (Gateway) et les micro-services du Cloud.  
+**Rôle :** middleware assurant la transmission fiable, asynchrone et distribuée des données entre la couche IoT (Gateway) et les micro-services du Cloud, capable de supporter un volume important de clients.
 
 ---
 
 **Mécanismes :**
 
-- **Workflow :**
-  - Reçoit les publications de la Gateway sur deux topics principaux :  
-    - `captor_name` → données brutes (Accéléromètre, BPM, Oxygène).  
-    - `alert` → messages prioritaires (alerte médicale, anomalie critique).  
-  - Les micro-services consommateurs (`data-processor`, `alert-service`) s’abonnent aux topics correspondants.  
-  - Les messages sont traités de manière asynchrone pour éviter tout blocage de flux.  
-  - **Justification :** découple complètement la collecte IoT du traitement applicatif, garantissant la tolérance aux pannes et une ingestion fluide à grande échelle.
+* **Workflow :**
+
+  * Reçoit les publications de la Gateway sur trois topics principaux :
+
+    * `accelerometer` → données brutes Accéléromètre (200 B/messages, 1 s)
+    * `heartRate` → données BPM (100 B/messages, 5 s)
+    * `bloodOxygen` → données SpO₂ (100 B/messages, 10 s)
+  * Chaque topic est partitionné pour permettre le parallélisme et une ingestion rapide.
+  * Les micro-services consommateurs (`data-processor`, `alert-service`) s’abonnent aux topics correspondants.
+  * **Justification :** découple la collecte IoT du traitement applicatif et permet une ingestion fluide pour 1000 clients, avec possibilité d’augmenter la capacité en ajoutant des partitions ou brokers.
 
 ---
 
-- **Sécurité :**
-  - Communication sécurisée via **SASL_SSL** (authentification + chiffrement TLS).  
-  - Contrôle d’accès par **ACL** sur les topics : seules les passerelles autorisées peuvent publier, et seuls les micro-services validés peuvent consommer.  
-  - **Justification :** prévient les accès non autorisés, la falsification des messages et les erreurs de structure.
+* **Sécurité :**
+
+  * Communication sécurisée via **SASL_SSL** (authentification + chiffrement TLS).
+  * Contrôle d’accès par **ACL** sur les topics : seules les passerelles autorisées peuvent publier, et seuls les micro-services validés peuvent consommer.
+  * **Justification :** prévient les accès non autorisés et garantit l’intégrité des messages.
 
 ---
 
-- **Fiabilité :**
-  - Réplication des partitions.  
-  - Acknowledgements (`acks=all`) pour garantir la persistance des messages.  
-  - Stockage persistant.  
-  - **Justification :** aucun message n’est perdu même en cas de panne d’un broker ou d’une instance Gateway.
+* **Fiabilité :**
+
+  * Réplication des partitions.
+  * Acknowledgements (`acks=all`) pour garantir la persistance des messages.
+  * Stockage persistant pour tous les messages publiés.
+  * **Justification :** aucun message n’est perdu même en cas de panne d’un broker ou d’une Gateway.
 
 ---
 
-- **Déploiement :**
-  - Cluster Kafka orchestré (Docker Compose).  
-  - Brokers distribués + Zookeeper.  
-  - Configuration de la rétention (ex : 7 jours) et du débit maximal par topic.  
-  - **Justification :** permet une montée en charge linéaire et un déploiement multi-environnements (préprod, prod, test).
+* **Déploiement :**
+
+  * Cluster Kafka orchestré (Docker Compose ou Kubernetes).
+  * Brokers distribués, avec possibilité d’ajouter des brokers si le nombre de clients augmente.
+  * Configuration de la rétention (1 jour pour l’Accéléromètre, BPM, SpO₂) et limitation du débit par topic.
+  * **Justification :** permet une montée en charge linéaire et un déploiement multi-environnements.
 
 ---
 
-- **Monitoring :**
-  - Intégration Prometheus :  
-    - latence moyenne de production et consommation,  
-    - taille des partitions,  
-    - taux d’erreurs réseau,  
-    - backlog de messages non consommés.  
-  - Alertes automatisées sur consommation lente ou saturation de partition.  
-  - **Justification :** garantit la stabilité du pipeline temps réel et la réactivité face aux anomalies.
+* **Monitoring :**
+
+  * Intégration Prometheus : latence de production et consommation, taille des partitions, taux d’erreurs, backlog de messages non consommés.
+  * Alertes sur consommation lente ou saturation de partition.
+  * **Justification :** garantit la stabilité du pipeline temps réel et une réactivité rapide aux anomalies.
 
 ---
 
-- **Scalabilité :**
-  - Partitionnement selon la charge pour paralléliser le traitement des données.  
-  - **Justification :** Kafka supporte une croissance continue sans goulot d’étranglement.
+* **Scalabilité :**
+
+  * Partitionnement par capteur pour paralléliser le traitement des données.
+  * Possibilité d’ajouter des brokers et partitions si le nombre de clients dépasse 1000, pour maintenir un débit fluide.
+  * **Justification :** Kafka supporte une croissance continue, jusqu’à plusieurs dizaines de milliers de clients simultanés, sans goulot d’étranglement.
 
 ---
 
 **Schéma :**
+
 ```mermaid
 graph TD
-    GW[IoT Gateway] -->|Topic: captor_name - mesures brutes| K[Kafka Cluster]
-    GW -->|Topic: alert - données critiques| K
-    K -->|Consommation asynchrone| MS[Microservices]
+%% IoT Gateway vers Kafka
+GW[IoT Gateway]
+
+%% Kafka Cluster avec un topic par capteur pour 1000 clients
+subgraph K[Kafka Cluster]
+    P1[Accéléromètre - 200 B/messages - 1 s - 1000 clients]
+    P2[BPM - 100 B/messages - 5 s - 1000 clients]
+    P3[Oxygène - 100 B/messages - 10 s - 1000 clients]
+end
+
+%% Microservices consommateurs
+subgraph MS[Microservices]
+    DP[Data Processor]
+    ALERT[Alert Service]
+end
+
+%% Flux
+GW -->|Publication Kafka| P1
+GW -->|Publication Kafka| P2
+GW -->|Publication Kafka| P3
+
+P1 -->|Consommation asynchrone| DP
+P2 -->|Consommation asynchrone| DP
+P3 -->|Consommation asynchrone| ALERT
+P1 -->|Consommation asynchrone| ALERT
+P2 -->|Consommation asynchrone| ALERT
 ```
 
 ## Microservices
@@ -350,7 +483,7 @@ Ensemble de services **Spring Boot** indépendants et conteneurisés, exposant d
 
 * **Conteneurs + Kubernetes** : scalabilité, résilience, déploiement sûr et rapide.
 * **Gateway centralisée** : simplifie l’authentification et le routage, réduit le couplage direct entre services.
-* **Kafka** : tolérance aux pannes et découplage des producteurs et consommateurs pour les alertes.
+* **Kafka** : tolérance aux pannes et scalabilité.
 * **Bases dédiées** : isolation des données, flexibilité, performance, et sécurité.
 * **Monitoring et observabilité** : indispensable pour détecter les anomalies, respecter les SLA et garantir la sécurité des données patients.
 
@@ -448,7 +581,7 @@ Ensemble de services **Spring Boot** indépendants et conteneurisés, exposant d
 
 **Rôle :**
 
-* Réception des alertes critiques depuis Kafka (`alert`).
+* Réception des données capteurs kafka et verifications des seuiles entrés par le docteur en charge du patient.
 * Notification par email et web aux docteurs/soignants.
 * Historisation des alertes pour audit et suivi médical.
 
@@ -522,7 +655,7 @@ Ensemble de services **Spring Boot** indépendants et conteneurisés, exposant d
 BLE assure une communication locale à très faible consommation énergétique, essentielle pour prolonger l’autonomie du bracelet médical. Son chiffrement AES-CCM garantit la confidentialité et l’intégrité des données transmises, réduisant ainsi les risques d’interception ou de modification.
 
 ### Apache Kafka  
-Kafka garantit une transmission asynchrone, fiable et scalable des données entre la passerelle IoT et les microservices. La réplication, les acknowledgements et le partitionnement assurent la persistance des messages, limitant le risque de perte de données. La séparation entre topics pour mesures et alertes permet un traitement prioritaire des urgences.
+Kafka garantit une transmission asynchrone, fiable et scalable des données entre la passerelle IoT et les microservices. La réplication, les acknowledgements et le partitionnement assurent la persistance des messages, limitant le risque de perte de données.
 
 ### PostgreSQL avec JSONB  
 PostgreSQL offre une base relationnelle robuste pour gérer les données structurées des utilisateurs, tandis que JSONB permet de stocker des formulaires flexibles sans rigidité de schéma, répondant à la nécessité de flexibilité et d’intégrité.
