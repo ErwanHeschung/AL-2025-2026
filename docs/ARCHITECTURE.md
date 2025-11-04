@@ -24,12 +24,12 @@ graph TD
 subgraph Edge["🏠 Edge"]
     B[Bracelet<br/>Capteur]
     GW[IoT Gateway<br/>Passerelle de communication]
-    B -->|BLE| GW
+    B -->|BLE / Données capteurs| GW
 end
 
 subgraph Fog["☁️ Fog"]
-    K[Kafka<br/>File de messages]
-    GW -->|Kafka Protocol| K
+    K[Kafka Cluster<br/>File de messages<br/>Topics: Accéléromètre, BPM, SpO₂]
+    GW -->|Kafka Protocol / TCP| K
 end
 
 subgraph Cloud["☁️☁️ Cloud"]
@@ -40,7 +40,7 @@ subgraph Cloud["☁️☁️ Cloud"]
 end
 
 UI -->|REST / HTTP| MS
-MS -->|Kafka Protocol| K
+K -->|Kafka Protocol / TCP| MS
 ```
 ---
 
