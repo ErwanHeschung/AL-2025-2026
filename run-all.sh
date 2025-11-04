@@ -1,4 +1,4 @@
-
+#!/bin/bash
 # ---------- 1. Start Kafka stack ----------
 echo "Starting Kafka stack..."
 docker-compose -f ./kafka/docker-compose.yml up -d

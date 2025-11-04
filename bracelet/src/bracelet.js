@@ -11,7 +11,7 @@ function randomNormal(mean, standardDeviation) {
 
 /* Sensor data */
 
-const SERIAL_NUMBER = Array.from({length: 3}, () => Math.floor(Math.random() * 0x10000).toString(16).padStart(4, '0').toUpperCase()).join('-');
+const SERIAL_NUMBER = 'BRP001';
 
 function getHeartRate() {
   return Math.round(Math.min(Math.max(randomNormal(75, 10), 40), 160));

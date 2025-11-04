@@ -7,6 +7,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NETWORK_NAME="microservices-net"
 PROJECT_NAME="microservices"
 
+if ! docker network ls | grep -q "$NETWORK_NAME"; then
+  echo "Creating Docker network: $NETWORK_NAME"
+  docker network create "$NETWORK_NAME"
+fi
+
 echo "Starting User service..."
 docker-compose -p "$PROJECT_NAME" -f "$SCRIPT_DIR/User/docker-compose.yml" up -d
 
