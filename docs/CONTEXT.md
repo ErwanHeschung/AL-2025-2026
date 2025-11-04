@@ -5,7 +5,7 @@
 3. [User Stories](#user-stories)  
 4. [Notre solution](#notre-solution)  
 5. [Justification](#justification)  
-6. [Domaine Driven Development](#domaine-driven-development)  
+6. [Domaine Driven Design](#domaine-driven-design)  
 
 ## Contexte
 
@@ -103,7 +103,7 @@ Cette architecture combine précision des mesures, simplicité d’usage et réa
 L’affichage des données dans l’interface web est conçu pour être synthétique et pertinent, avec une moyenne horaire sur le flux classique afin de limiter le bruit et faciliter la prise de décision médicale. Les alertes critiques sont mises en avant en temps réel afin de garantir une réaction rapide en cas d’urgence.  
 Cette combinaison capteurs/affichage offre un équilibre entre précision, pertinence et simplicité, adapté aux contraintes d’utilisation par des patients âgés et à la charge de travail du personnel médical.
 
-## Domaine Driven Development
+## Domaine Driven Design
 
 ### Core Domain (Domaine principal)  
 C’est le coeur métier différenciateur qui apporte de la valeur clinique essentielle :  
