@@ -25,6 +25,7 @@ L’objectif est d’améliorer la qualité de vie des patients tout en optimisa
 
 ### Contexte technologique  
 * Les patients utilisent un bracelet avec des capteurs embarqués comme source principale de données.  
+* Les bracelets sont connectés en bluetooth low energy à un dispositif connecté au réseau du domicile des patients.
 * La connectivité réseau est supposée généralement disponible au domicile des patients.  
 * Une application web constitue le point d’accès central pour tous les acteurs impliqués.  
 
