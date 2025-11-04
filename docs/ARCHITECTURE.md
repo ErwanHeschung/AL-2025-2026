@@ -631,19 +631,59 @@ Ensemble de services **Spring Boot** indépendants et conteneurisés, exposant d
 * Interface utilisateur pour consultation et interaction avec les données patients, formulaires et alertes.
 * Communique uniquement avec le **Gateway Microservice** pour accéder aux services backend.
 
-**Mécanismes :**
+### **Mécanismes :**
 
-* REST sécurisé via TLS vers la Gateway.
-* Authentification via JWT récupéré lors du login.
-* Consommation des notifications en temps réel (WebSocket) pour alertes critiques.
-* Monitoring de performance (temps de chargement, erreurs JS).
-* Scalabilité horizontale possible via hébergement sur un cluster web ou CDN.
+1. **Communication sécurisée via REST (HTTPS) :**
 
-**Justification :**
+   * L'interface utilisateur communique avec le **Gateway Microservice** via des **requêtes HTTP sécurisées** (HTTPS) utilisant **TLS** pour garantir la confidentialité et la sécurité des données échangées.
+   * **TLS** chiffre les données et authentifie le serveur pour éviter les interceptions de données sensibles pendant leur transit.
 
-* Séparation claire front/back pour sécurité et maintenabilité.
-* Consommation uniquement via Gateway réduit le couplage direct avec les microservices.
-* Notifications temps réel permettent une réactivité immédiate en cas d’alerte médicale.
+2. **Authentification via JWT :**
+
+   * L'authentification des utilisateurs se fait via un **JSON Web Token (JWT)**, obtenu lors du **login**. Ce token est utilisé pour valider les requêtes auprès du Gateway, assurant que seules les requêtes des utilisateurs authentifiés sont acceptées.
+   * **JWT** permet de sécuriser les sessions sans nécessiter de stockage côté serveur, ce qui allège la gestion des sessions.
+
+3. **Notifications en temps réel via WebSocket :**
+
+   * Pour les alertes critiques (ex. : état médical anormal), l'interface utilise un **WebSocket** pour recevoir des notifications en temps réel. Cela permet aux utilisateurs de recevoir immédiatement des alertes sur leur tableau de bord sans avoir à rafraîchir manuellement la page.
+   * Le WebSocket assure une communication bidirectionnelle persistante entre l'interface utilisateur et le serveur, idéale pour des mises à jour en temps réel.
+
+4. **Suivi de la performance du frontend :**
+
+   * Des outils de **monitoring des performances** sont utilisés pour suivre des indicateurs clés tels que les **temps de chargement** des pages, les **erreurs JavaScript** sur le frontend et la **réactivité de l'interface**. Cela permet d’identifier rapidement des problèmes de performance et de maintenir une expérience utilisateur fluide.
+
+5. **Scalabilité horizontale :**
+
+   * L'application frontend peut être **scalée horizontalement** en la déployant sur un **cluster web** ou en utilisant un **Content Delivery Network (CDN)** pour distribuer les contenus statiques (images, scripts, CSS) afin d'améliorer la vitesse de chargement et l'accessibilité à grande échelle.
+   * **CDN** permet de réduire la latence pour les utilisateurs géographiquement éloignés du serveur principal, et de gérer un plus grand nombre de requêtes simultanées.
+
+---
+
+### **Justification :**
+
+* **Séparation Frontend/Backend** : La séparation claire entre le frontend et le backend permet une meilleure sécurité (ex. : gestion des authentifications et des permissions au niveau du **Gateway Microservice**) et facilite la maintenance, car chaque partie peut évoluer indépendamment.
+* **Réduction du couplage avec les microservices** : En faisant passer toute la communication backend par le **Gateway Microservice**, le frontend ne dépend que d'un seul point d'accès, simplifiant ainsi la gestion des API, la sécurité et la maintenance.
+  
+**Schéma :**
+
+```mermaid
+graph TD
+    %% Web Interface
+    UI[Web Interface<br/>Angular Front-end]
+
+    %% CDN
+    CDN[Content Delivery Network<br/>Fichiers statiques]
+
+    %% Gateway Microservice
+    GW[Gateway Microservice<br/>Passerelle Backend]
+
+    %% Flux de communication
+    UI -->|Requêtes REST via TLS| GW
+    UI -->|Notifications WebSocket| GW
+    UI -->|Contenu statique| CDN
+    CDN -->|Fichiers statiques| UI
+
+```
 
 # Schema global
 
