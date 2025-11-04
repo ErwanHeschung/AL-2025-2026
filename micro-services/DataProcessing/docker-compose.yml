@@ -23,6 +23,13 @@ services:
     networks:
       - kafka-net
       - microservices-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d healthdata"]
+      interval: 5s
+      retries: 5
+      timeout: 2s
+      start_period: 5s
+
   data-processing-service:
     container_name: data-processing-service
     build: .
@@ -38,5 +45,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://timescaledb:5432/healthdata
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: password
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+
 volumes:
   timescaledb_data:
